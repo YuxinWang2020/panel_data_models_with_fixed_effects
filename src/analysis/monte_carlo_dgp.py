@@ -41,9 +41,9 @@ def dgp_time_invariant_fixed_effects_model(T, N, *, beta1, beta2):
     mu = 0
     gamma = 0
     delta = 0
-    factor = np.tile([[1], [0]], (1, T))
-    lambda_ = np.vstack(
-        (np.random.normal(loc=0, scale=1, size=(1, N)), np.ones(shape=(1, N)))
+    factor = np.tile([1, 0], (T, 1))
+    lambda_ = np.hstack(
+        (np.random.normal(loc=0, scale=1, size=(N, 1)), np.ones(shape=(N, 1)))
     )
     X, Y = _dgp_fixed_effect_panel_data(
         T, N, beta1, beta2, mu, gamma, delta, factor, lambda_
@@ -103,10 +103,10 @@ def dgp_additive_fixed_effects_model(T, N, *, beta1, beta2):
     gamma = 0
     delta = 0
     factor = np.vstack(
-        (np.ones(shape=(1, T)), np.random.normal(loc=0, scale=1, size=(1, T)))
+        (np.ones(shape=(T, 1)), np.random.normal(loc=0, scale=1, size=(T, 1)))
     )
     lambda_ = np.vstack(
-        (np.random.normal(loc=0, scale=1, size=(1, N)), np.ones(shape=(1, N)))
+        (np.random.normal(loc=0, scale=1, size=(N, 1)), np.ones(shape=(N, 1)))
     )
     X, Y = _dgp_fixed_effect_panel_data(
         T, N, beta1, beta2, mu, gamma, delta, factor, lambda_
@@ -170,8 +170,8 @@ def dgp_interactive_fixed_effects_model(T, N, *, beta1, beta2, mu):
     p = 3
     gamma = 0
     delta = 0
-    factor = np.random.normal(loc=0, scale=1, size=(2, T))
-    lambda_ = np.random.normal(loc=0, scale=1, size=(2, N))
+    factor = np.random.normal(loc=0, scale=1, size=(T, 2))
+    lambda_ = np.random.normal(loc=0, scale=1, size=(N, 2))
     X, Y = _dgp_fixed_effect_panel_data(
         T, N, beta1, beta2, mu, gamma, delta, factor, lambda_
     )
@@ -244,8 +244,8 @@ def dgp_interactive_fixed_effects_model_with_common_and_time_invariant(
     correlated with :math:`f_t`.
     """
     # Set parameters
-    factor = np.random.normal(loc=0, scale=1, size=(2, T))
-    lambda_ = np.random.normal(loc=0, scale=1, size=(2, N))
+    factor = np.random.normal(loc=0, scale=1, size=(T, 2))
+    lambda_ = np.random.normal(loc=0, scale=1, size=(N, 2))
     X, Y = _dgp_fixed_effect_panel_data(
         T, N, beta1, beta2, mu, gamma, delta, factor, lambda_
     )
@@ -257,35 +257,35 @@ def _dgp_fixed_effect_panel_data(T, N, beta1, beta2, mu, gamma, delta, factor, l
     iota = np.array([[1], [1]])
     mu1 = mu2 = c1 = c2 = 1
     # Generate variables
-    eta_1 = np.random.normal(loc=0, scale=1, size=(N, T))
-    eta_2 = np.random.normal(loc=0, scale=1, size=(N, T))
-    eps = np.random.normal(loc=0, scale=2, size=(N, T))
-    e = np.random.normal(loc=0, scale=1, size=(N, 1))
-    eta = np.random.normal(loc=0, scale=1, size=(1, T))
+    eta_1 = np.random.normal(loc=0, scale=1, size=(T, N))
+    eta_2 = np.random.normal(loc=0, scale=1, size=(T, N))
+    eps = np.random.normal(loc=0, scale=2, size=(T, N))
+    e = np.random.normal(loc=0, scale=1, size=(1, N))
+    eta = np.random.normal(loc=0, scale=1, size=(T, 1))
     # Calculate intermediate variables
-    iota_lambda = lambda_.T.dot(iota)
-    iota_factor = iota.T.dot(factor)
-    lambda_factor = lambda_.T.dot(factor)
+    iota_lambda = lambda_.dot(iota).T
+    iota_factor = factor.dot(iota)
+    lambda_factor = factor.dot(lambda_.T)
     x = iota_lambda + e
     w = iota_factor + eta
     # Simulate data
     X_1 = (
         mu1
         + c1 * lambda_factor
-        + np.tile(iota_lambda, (1, T))
-        + np.tile(iota_factor, (N, 1))
+        + np.tile(iota_lambda, (T, 1))
+        + np.tile(iota_factor, (1, N))
         + eta_1
     )
     X_2 = (
         mu2
         + c2 * lambda_factor
-        + np.tile(iota_lambda, (1, T))
-        + np.tile(iota_factor, (N, 1))
+        + np.tile(iota_lambda, (T, 1))
+        + np.tile(iota_factor, (1, N))
         + eta_2
     )
-    X_3 = np.ones(shape=(N, T))
-    X_4 = np.tile(x, (1, T))
-    X_5 = np.tile(w, (N, 1))
+    X_3 = np.ones(shape=(T, N))
+    X_4 = np.tile(x, (T, 1))
+    X_5 = np.tile(w, (1, N))
     X = np.stack([X_1, X_2, X_3, X_4, X_5])
     Y = (
         beta1 * X_1
