@@ -111,7 +111,7 @@ def test_fit_beta_hat(normal_input):
     beta_hat, beta_hat_list, f_hat, lambda_hat = interactive_estimator.fit(
         r=2, beta_hat_0=normal_input["beta"]
     )
-    expect_beta_hat = np.array([[1.523508, 2.609971, 4.903340, 1.522600, 4.158032]])
+    expect_beta_hat = np.array([1.523508, 2.609971, 4.903340, 1.522600, 4.158032])
     np.testing.assert_array_almost_equal(beta_hat, expect_beta_hat)
 
 
@@ -167,7 +167,7 @@ def test_calculate_sde(no_singular_input):
     interactive_estimator = InteractiveFixedEffect(
         no_singular_input["Y"], no_singular_input["X"]
     )
-    beta_hat = np.array([[1.58449785, 2.91245544, 6.30095423, 0.86989401, 3.04711109]])
+    beta_hat = np.array([1.58449785, 2.91245544, 6.30095423, 0.86989401, 3.04711109])
     f_hat = np.array(
         [
             [-0.88737213, -0.39353972],

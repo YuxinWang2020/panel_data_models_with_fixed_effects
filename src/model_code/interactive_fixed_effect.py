@@ -62,6 +62,7 @@ class InteractiveFixedEffect:
             beta_hat_list = np.row_stack((beta_hat_list, beta_hat))
             e = np.linalg.norm(beta_hat - beta_hat_0, ord=2)
             beta_hat_0 = beta_hat
+        beta_hat = beta_hat.ravel()
         return (beta_hat, beta_hat_list, f_hat, lambda_hat)
 
     def _calculate_f_hat(self, beta_hat, r):
@@ -96,6 +97,7 @@ class InteractiveFixedEffect:
         """
         Calculate Standard Error of beta_hat estimated from fit
         """
+        beta_hat = np.array(beta_hat).reshape(1, self.p)
         a = self._calculate_a(lambda_hat)
         M = self._calculate_M(f_hat)
         Z = self._calculate_Z(M, a)
