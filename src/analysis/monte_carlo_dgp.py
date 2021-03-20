@@ -104,10 +104,10 @@ def dgp_additive_fixed_effects_model(T, N, *, beta1, beta2, **kw):
     mu = 0
     gamma = 0
     delta = 0
-    factor = np.vstack(
+    factor = np.hstack(
         (np.ones(shape=(T, 1)), np.random.normal(loc=0, scale=1, size=(T, 1)))
     )
-    lambda_ = np.vstack(
+    lambda_ = np.hstack(
         (np.random.normal(loc=0, scale=1, size=(N, 1)), np.ones(shape=(N, 1)))
     )
     X, Y = _dgp_fixed_effect_panel_data(
