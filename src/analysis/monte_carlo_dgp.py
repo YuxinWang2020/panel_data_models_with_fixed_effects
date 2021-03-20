@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 
 
 def dgp_time_invariant_fixed_effects_model(T, N, *, beta1, beta2, **kw):
@@ -49,7 +50,8 @@ def dgp_time_invariant_fixed_effects_model(T, N, *, beta1, beta2, **kw):
         T, N, beta1, beta2, mu, gamma, delta, factor, lambda_
     )
     X = X[0:p, :, :]
-    return X, Y
+    panel_df = _ndarray_to_panel_df(X, Y)
+    return X, Y, panel_df
 
 
 def dgp_additive_fixed_effects_model(T, N, *, beta1, beta2, **kw):
@@ -112,7 +114,8 @@ def dgp_additive_fixed_effects_model(T, N, *, beta1, beta2, **kw):
         T, N, beta1, beta2, mu, gamma, delta, factor, lambda_
     )
     X = X[0:p, :, :]
-    return X, Y
+    panel_df = _ndarray_to_panel_df(X, Y)
+    return X, Y, panel_df
 
 
 def dgp_interactive_fixed_effects_model(T, N, *, beta1, beta2, mu, **kw):
@@ -176,7 +179,8 @@ def dgp_interactive_fixed_effects_model(T, N, *, beta1, beta2, mu, **kw):
         T, N, beta1, beta2, mu, gamma, delta, factor, lambda_
     )
     X = X[0:p, :, :]
-    return X, Y
+    panel_df = _ndarray_to_panel_df(X, Y)
+    return X, Y, panel_df
 
 
 def dgp_interactive_fixed_effects_model_with_common_and_time_invariant(
@@ -249,7 +253,8 @@ def dgp_interactive_fixed_effects_model_with_common_and_time_invariant(
     X, Y = _dgp_fixed_effect_panel_data(
         T, N, beta1, beta2, mu, gamma, delta, factor, lambda_
     )
-    return X, Y
+    panel_df = _ndarray_to_panel_df(X, Y)
+    return X, Y, panel_df
 
 
 def _dgp_fixed_effect_panel_data(T, N, beta1, beta2, mu, gamma, delta, factor, lambda_):
@@ -297,3 +302,21 @@ def _dgp_fixed_effect_panel_data(T, N, beta1, beta2, mu, gamma, delta, factor, l
         + eps
     )
     return X, Y
+
+
+def _ndarray_to_panel_df(X, Y):
+    p = X.shape[0]
+    T = X.shape[1]
+    N = X.shape[2]
+    x = [pd.Series(X[i, :, :].T.ravel()) for i in range(p)]
+    y = pd.Series(Y.T.ravel())
+    year = pd.Series(np.tile(range(T), N))
+    nr = pd.Series(np.repeat(range(N), T))
+    panel_df = pd.concat([nr, year, y, *x], axis=1)
+    panel_df.set_axis(
+        ["nr", "year", "y"] + ["x" + str(i + 1) for i in range(p)],
+        axis="columns",
+        inplace=True,
+    )
+    panel_df.set_index(["nr", "year"], inplace=True)
+    return panel_df
