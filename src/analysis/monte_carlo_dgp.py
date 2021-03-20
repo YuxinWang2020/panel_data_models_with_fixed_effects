@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def dgp_time_invariant_fixed_effects_model(T, N, *, beta1, beta2):
+def dgp_time_invariant_fixed_effects_model(T, N, *, beta1, beta2, **kw):
     r"""
     Monte carlo data generate processor for "Interactive Fixed Effects Model with Common
     Regressors and Time-invariant Regressors"
@@ -52,7 +52,7 @@ def dgp_time_invariant_fixed_effects_model(T, N, *, beta1, beta2):
     return X, Y
 
 
-def dgp_additive_fixed_effects_model(T, N, *, beta1, beta2):
+def dgp_additive_fixed_effects_model(T, N, *, beta1, beta2, **kw):
     r"""
     Monte carlo data generate processor for "Interactive Fixed Effects Model with Common
     Regressors and Time-invariant Regressors"
@@ -115,7 +115,7 @@ def dgp_additive_fixed_effects_model(T, N, *, beta1, beta2):
     return X, Y
 
 
-def dgp_interactive_fixed_effects_model(T, N, *, beta1, beta2, mu):
+def dgp_interactive_fixed_effects_model(T, N, *, beta1, beta2, mu, **kw):
     r"""
     Monte carlo data generate processor for "Interactive Fixed Effects Model"
 
@@ -180,7 +180,7 @@ def dgp_interactive_fixed_effects_model(T, N, *, beta1, beta2, mu):
 
 
 def dgp_interactive_fixed_effects_model_with_common_and_time_invariant(
-    T, N, *, beta1, beta2, mu, gamma, delta
+    T, N, *, beta1, beta2, mu, gamma, delta, **kw
 ):
     r"""
     Monte carlo data generate processor for "Interactive Fixed Effects Model with Common
