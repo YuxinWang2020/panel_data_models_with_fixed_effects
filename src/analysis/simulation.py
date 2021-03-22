@@ -4,8 +4,10 @@ import numpy as np
 import pandas as pd
 from linearmodels.panel import PanelOLS
 from linearmodels.panel import PooledOLS
+from scipy.stats import norm
 
 from src.model_code.interactive_fixed_effect import InteractiveFixedEffect
+from src.model_code.statistics import caculate_rmse
 from src.model_code.utils import paste
 
 
@@ -162,3 +164,96 @@ def simulation_coefficient(
         df_sim_result = df_sim_result.append(one_sim_result)
     df_sim_result = df_sim_result.reset_index(drop=True)
     return df_sim_result
+
+
+def statistics_coefficient(all_N, all_T, nsims, df_sim_result, **beta_true):
+    # vectorize startswith() to apply it in a string list
+    startswith_vec = np.vectorize(str.startswith)
+    # guess number of variables from column names
+    p = sum(startswith_vec(df_sim_result.columns, "beta_interactive."))
+    assert len(beta_true) >= p, "short of beta_true"
+    beta_true_list = [
+        beta_true[k]
+        for k in ("beta1", "beta2", "mu", "gamma", "delta")
+        if k in beta_true
+    ][:p]
+    df_statistic = pd.DataFrame(
+        index=range(len(all_N)),
+        columns=[
+            "T",
+            "N",
+            *paste("mean_interactive", range(1, p + 1), sep="."),
+            *paste("bias_interactive", range(1, p + 1), sep="."),
+            *paste("sde_interactive", range(1, p + 1), sep="."),
+            *paste("ci_l_interactive", range(1, p + 1), sep="."),
+            *paste("ci_u_interactive", range(1, p + 1), sep="."),
+            *paste("rmse_interactive", range(1, p + 1), sep="."),
+            *paste("mean_within", range(1, p + 1), sep="."),
+            *paste("bias_within", range(1, p + 1), sep="."),
+            *paste("sde_within", range(1, p + 1), sep="."),
+            *paste("ci_l_within", range(1, p + 1), sep="."),
+            *paste("ci_u_within", range(1, p + 1), sep="."),
+            *paste("rmse_within", range(1, p + 1), sep="."),
+        ],
+    )
+
+    # three quick function to get and modify df_statistic and df_sim_result
+
+    def get_stat(col):
+        return df_statistic.iloc[i, startswith_vec(df_statistic.columns, col)]
+
+    def get_sim(col):
+        return df_sim_result.iloc[
+            row_range_df_sim, startswith_vec(df_sim_result.columns, col)
+        ]
+
+    def set_stat(col, value):
+        df_statistic.iloc[i, startswith_vec(df_statistic.columns, col)] = value
+
+    for i in range(len(all_N)):
+        df_statistic.loc[i, "N"] = all_N[i]
+        df_statistic.loc[i, "T"] = all_T[i]
+        row_range_df_sim = range(i * nsims, (i + 1) * nsims)
+        set_stat("mean_interactive", get_sim("beta_interactive").mean())
+        set_stat("mean_within", get_sim("beta_within").mean())
+        set_stat(
+            "bias_interactive",
+            get_stat("mean_interactive").sub(beta_true_list).abs().div(beta_true_list),
+        )
+        set_stat(
+            "bias_within",
+            get_stat("mean_within").sub(beta_true_list).abs().div(beta_true_list),
+        )
+        if not np.isnan(get_sim("sde_interactive")).all(axis=None, skipna=False):
+            set_stat("sde_interactive", get_sim("sde_interactive").mean())
+            set_stat(
+                "ci_l_interactive",
+                get_stat("mean_interactive").sub(
+                    get_stat("sde_interactive").mul(norm.ppf(0.975)).values
+                ),
+            )
+            set_stat(
+                "ci_u_interactive",
+                get_stat("mean_interactive").add(
+                    get_stat("sde_interactive").mul(norm.ppf(0.975)).values
+                ),
+            )
+        set_stat("sde_within", get_sim("sde_within").mean())
+        set_stat(
+            "ci_l_within",
+            get_stat("mean_within").sub(
+                get_stat("sde_within").mul(norm.ppf(0.975)).values
+            ),
+        )
+        set_stat(
+            "ci_u_within",
+            get_stat("mean_within").add(
+                get_stat("sde_within").mul(norm.ppf(0.975)).values
+            ),
+        )
+        set_stat(
+            "rmse_interactive",
+            caculate_rmse(get_sim("beta_interactive"), beta_true_list),
+        )
+        set_stat("rmse_within", caculate_rmse(get_sim("beta_within"), beta_true_list))
+    return df_statistic
