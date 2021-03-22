@@ -29,7 +29,7 @@ def test_simulation_coefficient_model1():
         delta=4,
     )
     assert df_sim_result.shape == (4, 11)
-    assert not np.isnan(df_sim_result).any(axis=None, skipna=False)
+    assert not df_sim_result.isna().any(axis=None, skipna=False)
 
 
 def test_simulation_coefficient_model2():
@@ -52,7 +52,7 @@ def test_simulation_coefficient_model2():
         delta=4,
     )
     assert df_sim_result.shape == (4, 11)
-    assert not np.isnan(df_sim_result).any(axis=None, skipna=False)
+    assert not df_sim_result.isna().any(axis=None, skipna=False)
 
 
 def test_simulation_coefficient_model3():
@@ -75,7 +75,7 @@ def test_simulation_coefficient_model3():
         delta=4,
     )
     assert df_sim_result.shape == (4, 15)
-    assert not np.isnan(df_sim_result).any(axis=None, skipna=False)
+    assert not df_sim_result.isna().any(axis=None, skipna=False)
 
 
 def test_simulation_coefficient_model4():
@@ -101,5 +101,5 @@ def test_simulation_coefficient_model4():
     na_expect = np.full(23, False)
     na_expect[[11, 12, 21, 22]] = True
     np.testing.assert_array_equal(
-        np.isnan(df_sim_result).any(axis=0, skipna=False), na_expect
+        df_sim_result.isna().any(axis=0, skipna=False), na_expect
     )

@@ -92,7 +92,7 @@ def simulation_coefficient(
             )
         else:
             start_value_estimator = PooledOLS(
-                panel_df.y, panel_df[["x" + str(i + 1) for i in range(p)]]
+                panel_df.y, panel_df[["x" + str(i) for i in range(1, p + 1)]]
             )
         start_value_result = start_value_estimator.fit()
         interactive_start_value = [
@@ -153,11 +153,12 @@ def simulation_coefficient(
                 "T",
                 "N",
                 "sim",
-                *paste("beta_interactive", range(p), sep="."),
-                *paste("beta_within", range(p), sep="."),
-                *paste("sde_interactive", range(p), sep="."),
-                *paste("sde_within", range(p), sep="."),
+                *paste("beta_interactive", range(1, p + 1), sep="."),
+                *paste("beta_within", range(1, p + 1), sep="."),
+                *paste("sde_interactive", range(1, p + 1), sep="."),
+                *paste("sde_within", range(1, p + 1), sep="."),
             ],
         )
         df_sim_result = df_sim_result.append(one_sim_result)
+    df_sim_result = df_sim_result.reset_index(drop=True)
     return df_sim_result
