@@ -33,6 +33,9 @@ dependencies:
   - r-rjson
   - r-lmtest
   - r-sandwich
+  - r-ggplot2
+  - r-rjson
+  - r-dplyr
 
 
   - virtualenv=20.0.33
@@ -45,4 +48,3 @@ dependencies:
     - sphinx-autobuild
     - sphinx-rtd-theme
     - sphinxcontrib-bibtex
-
