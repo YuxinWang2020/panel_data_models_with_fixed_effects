@@ -214,6 +214,6 @@
     "beta1": 1,
     "beta2": 3
   },
-  "rng_seed": 11,
+  "rng_seed": 21,
   "model_name": "model1"
 }

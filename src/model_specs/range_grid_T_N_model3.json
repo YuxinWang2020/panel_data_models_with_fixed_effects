@@ -204,7 +204,7 @@
     90,
     100
   ],
-  "nsims": 1000,
+  "nsims": 10,
   "need_sde": false,
   "tolerance": 0.0001,
   "r": 2,
@@ -215,6 +215,6 @@
     "beta2": 3,
     "mu": 5
   },
-  "rng_seed": 13,
+  "rng_seed": 23,
   "model_name": "model3"
 }
