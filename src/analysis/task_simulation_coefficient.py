@@ -1,5 +1,4 @@
 import json
-import pickle
 
 import numpy as np
 import pytask
@@ -25,7 +24,7 @@ from src.config import SRC
     [
         (
             SRC / "model_specs" / f"{simulate_name}.json",
-            BLD / "analysis" / f"sim_result_{simulate_name}.pickle",
+            BLD / "analysis" / f"sim_result_{simulate_name}.csv",
         )
         for simulate_name in [
             "range_N_model1",
@@ -61,6 +60,5 @@ def task_simulation_coefficient(depends_on, produces):
         within_effect=simulate["within_effect"],
         **simulate["beta_true"],
     )
-    # Store simulate and df_sim_result with locations after each round
-    with open(produces, "wb") as out_file:
-        pickle.dump((simulate, df_sim_result), out_file)
+    # Store df_sim_result with locations after each round
+    df_sim_result.to_csv(produces, index=False)
