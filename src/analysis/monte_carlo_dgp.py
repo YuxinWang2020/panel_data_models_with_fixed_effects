@@ -320,3 +320,16 @@ def _ndarray_to_panel_df(X, Y):
     )
     panel_df.set_index(["nr", "year"], inplace=True)
     return panel_df
+
+
+def dgp_random_iid_residual(N, T, r):
+    """
+    Rand residual data generate processor.
+    Residual = Y - beta * X = Lambda * Factor + eps
+    Shape of residual is (N, T).
+    """
+    lambda_ = np.random.normal(loc=0, scale=1, size=(r, N))
+    f = np.random.normal(loc=0, scale=1, size=(r, T))
+    eps = np.random.normal(loc=0, scale=1, size=(N, T))
+    residual = lambda_.T.dot(f) + eps * np.sqrt(r)
+    return residual
