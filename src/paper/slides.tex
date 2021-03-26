@@ -1,0 +1,804 @@
+\documentclass{beamer}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{xcolor}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\title{Panel Data Models with Fixed Effects}
+\author{Yuxin Wang}
+\date{Febrary 2021}
+
+\usefonttheme{professionalfonts}
+\newcommand{\IR}[0]{\mathbb{R}}
+\newcommand{\IE}[0]{\mathbb{E}}
+\newcommand{\IQ}[0]{\mathbb{Q}}
+\newcommand{\IZ}[0]{\mathbb{Z}}
+\newcommand{\IN}[0]{\mathbb{N}}
+
+\addtobeamertemplate{navigation symbols}{}{%
+    \usebeamerfont{footline}%
+    \usebeamercolor[fg]{footline}%
+    \hspace{1em}%
+    \insertframenumber/\inserttotalframenumber
+}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+\begin{frame}{Content}
+\begin{itemize}
+    \item Pooled Estimator
+    \item Fixed Effects Models
+    \item Monte Carlo Simulations
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Panel Data}
+    \begin{itemize}
+        \item Panel data consist of observations on many individual economic units over two or more periods of time.
+        \item Common panel data include consumption $y_{it}$ of a household $i$ in a period $t$, or income $x_{it}$ of household $i$ in a period $t$.
+        \item We are interested in the linear relationship between $x_{it}$ and $y_{it}$:
+        \[
+            y_{it}=\beta x_{it}+u_{it},
+        \]
+        where $u_{it}$ is an error term.
+
+    \end{itemize}
+
+\end{frame}
+
+\section{Pooled Estimator}
+%\begin{frame}{Pooled Estimator}
+%    {\color{gray}\footnotesize \[
+%        y_{it}= \beta %x_{it}+\binom{\lambda_{i1}}{\lambda_{i2}}' %\binom{f_{t1}}{f_{t2}}+\epsilon_{it}
+%    \]}
+%    Suppose the true fixed effect takes the form
+%    \[
+%        \binom{\lambda_{i1}}{\lambda_{i2}}=\binom{\%beta_0}{0},\binom{f_{t1}}{f_{t2}}=\binom{1}{0}.
+%    \]
+%    Then the model can be written as
+%    \[
+%        y_{it}=\beta_0+\beta x_{it}+\epsilon_{it}.
+%    \]
+
+%\end{frame}
+
+\begin{frame}{Pooled Estimator}
+    {\color{gray}\footnotesize \[
+        y_{it}= \beta x_{it}+u_{it}
+    \]}
+    The pooled estimator $\hat \beta$ based on the observations $\{x_{it}, y_{it}\}$ is the OLS estimator defined by
+    \[
+        \hat \beta=\left[\sum_{i=1}^N\sum_{t=1}^T(x_{it}-\bar x)^2\right]^{-1}\left[\sum_{i=1}^N\sum_{t=1}^T(x_{it}-\bar x)(y_{it}-\bar y)\right],
+    \]
+    where
+    \[
+        \bar x=\frac{1}{NT}\sum_{i=1}^N\sum_{t=1}^T x_{it}
+    \]
+    is the overall average of the observation, and $\bar y$ is defined analogously.
+\end{frame}
+
+\begin{frame}{Consistency Pooled Estimator}
+    {\color{gray}\footnotesize
+    \[
+    y_{it}= \beta x_{it}+u_{it}
+    \]
+    \[
+        \hat \beta=\left[\sum_{i=1}^N\sum_{t=1}^T(x_{it}-\bar x)^2\right]^{-1}\left[\sum_{i=1}^N\sum_{t=1}^T(x_{it}-\bar x)(y_{it}-\bar y)\right]
+    \]
+
+    }
+
+    \begin{itemize}
+        \item The pooled estimator is an OLS estimator.
+        \item By assuming the full rank condition and that the random variables $\{x_{it}\}$ and $\{u_{it}\}$ are i.i.d. across $i$ and that $E[u_{it}\boldsymbol x_i]=0$, we can deduce that $\hat \beta$ converges to $\beta$ in probability as $N \to \infty$ for any fixed $T$.
+    \end{itemize}
+\end{frame}
+
+
+
+% \section{Fixed Effects Models}
+% \begin{frame}{Fixed Effects Models}
+% {\color{gray}\footnotesize \[
+%         y_{it}= x_{it} \beta+u_{it}
+%     \]}
+% \begin{itemize}
+%     \item We have seen that the pooled estimator is consistent if $E[u_{it}|x_i]=0$.
+%     \item However, it is likely that the regressor is not strictly exogenous; e.g., we could have $u_{it}=\lambda_if_t+\epsilon_{it}$, where $\lambda_i, f_t$ and $x_{it}$ are correlated.
+%     \item We call $\lambda_if_t$ the unobserved interactive fixed effect.
+%   \item So the fixed effects model reads
+%     \[
+%         y_{it}=x_{it}\beta+\lambda_if_t+\epsilon_{it}.
+%     \]
+% \end{itemize}
+
+% \end{frame}
+
+\begin{frame}{Motivation of Fixed Effects}
+    Suppose that we have the data set $y_{it}$ and $x_{it}$, where
+    \begin{itemize}
+        \item $y_{it}$: Consumption of household $i$ in one country in period $t$;
+        \item $x_{it}$: Income of household $i$ in period $t$.
+    \end{itemize}
+    The true relationship between $x_{it}$ and $y_{it}$ is
+    $$y_{it}=\beta x_{it}+u_{it},$$ where $u_{it}=\lambda_if_t+\epsilon_{it}$ and
+
+    \begin{itemize}
+        \item $\lambda_i$: (Demeaned) Education of employed members of household $i$;
+        \item $f_t$: Economic situation of the country in period $t$;
+        \item $\epsilon_{it}$: Unobserved error.
+    \end{itemize}
+
+    Should we use pooled estimator to estimate $\beta$?
+
+\end{frame}
+
+\begin{frame}{Motivation of Fixed Effects}
+{\color{gray}\footnotesize \[
+        y_{it}= \beta x_{it}+u_{it}, \qquad u_{it}=\lambda_if_t+\epsilon_{it}
+    \]
+   {\centering
+   {$y_{it}$: consumption, $x_{it}$: income, $\lambda_i$: education, $f_t$: economic situation}
+
+
+    }
+    }
+    \begin{itemize}
+
+        \item The education $\lambda_i$ and economic situation $f_t$ are correlated with the income $x_{it}$ of household.
+        \item In particular, the regressor $x_{it}$ is not exogenous.
+        \item And the pooled estimator is not consistent in general.
+    \end{itemize}
+\end{frame}
+
+\section{Fixed Effects Models}
+\begin{frame}{Fixed Effects Models}
+    The general interactive fixed effects models with $r$ factors take the following form
+    \begin{align*}
+        y_{it}&= \beta x_{it}+\boldsymbol \lambda_i'\boldsymbol f_t+\epsilon_{it}\\
+        &=\beta x_{it}+ \sum_{s=1}^r \lambda_{is} f_{ts}+\epsilon_{it}.
+    \end{align*}
+
+    \begin{itemize}
+        \item $y_{it}, x_{it}$ are observable.
+        \item The fixed effects $\lambda_{is}$ and $f_{ts}$ are unknown.
+        \item We are interested in the true value of $\beta$.
+    \end{itemize}
+
+
+\end{frame}
+
+\begin{frame}{An Accompanying Example}
+    To make the notations as simple as possible, we look at the case where $r=2$:
+    \[
+    y_{it}= \beta x_{it}+\binom{\lambda_{i1}}{\lambda_{i2}}' \binom{f_{t1}}{f_{t2}}+\epsilon_{it}
+    \]
+    In the following, we are going to see different estimating strategy based on different forms of fixed effects.
+\end{frame}
+
+
+
+
+\begin{frame}{Time Invariant Fixed Effects Model}
+{\color{gray}\footnotesize \[
+       y_{it}= \beta x_{it}+\binom{\lambda_{i1}}{\lambda_{i2}}' \binom{f_{t1}}{f_{t2}}+\epsilon_{it}
+    \]}
+
+    By setting
+
+
+
+    \[
+    \binom{\lambda_{i1}}{\lambda_{i2}}=\binom{\alpha_i}{0} \text{ and } \binom{f_{t1}}{f_{t2}}=\binom{1}{0},
+    \]
+
+    the model reads
+    \[
+    y_{it}=x_{it}\beta+\alpha_i+\epsilon_{it},
+    \]
+    which is the time invariant fixed effects model.
+\end{frame}
+
+\begin{frame}{Additive Fixed Effects Model}
+    {\color{gray}\footnotesize \[
+       y_{it}= \beta x_{it}+\binom{\lambda_{i1}}{\lambda_{i2}}' \binom{f_{t1}}{f_{t2}}+\epsilon_{it}
+    \]}
+
+    By setting
+
+
+
+    \[
+    \binom{\lambda_{i1}}{\lambda_{i2}}=\binom{\alpha_i}{1} \text{ and } \binom{f_{t1}}{f_{t2}}=\binom{1}{d_t},
+    \]
+
+    the model reads
+    \[
+    y_{it}=x_{it}\beta+\alpha_i+d_t+\epsilon_{it},
+    \]
+    which is the additive fixed effects model.
+\end{frame}
+
+% \begin{frame}{Time Invariant and Additive Fixed Effects Model}
+% \begin{itemize}
+%     \item The idea to estimate the coefficients in these models is to cancel the unobserved fixed effects by demeaning the models.
+%     \item In this way, we transform the models into the pooled model. And we can use the pooled estimator.
+% \end{itemize}
+
+% \end{frame}
+
+
+
+
+
+% \begin{frame}{Fixed Effects Model}
+% {\color{gray}\footnotesize \[
+%         y_{it}=x_{it}\beta+\alpha_i+\epsilon_{it}
+%     \]}
+% \begin{itemize}
+
+%     \item We can estimate $\beta$ by eliminating the fixed effect:
+%     \[
+%     \frac{1}{T}\sum_{t=1}^{T}y_{it}=\frac{1}{T}\sum_{t=1}^{T}x_{it}\beta+\underbrace{\frac{1}{T}\sum_{t=1}^{T}\alpha_i}_{=\alpha_i}+\frac{1}{T}\sum_{t=1}^{T}\epsilon_{it}.
+%     \]
+%     \item Subtract the equation above from the fixed effect model. We obtain
+%     \[
+%         \tilde y_{it}=\tilde x_{it}\beta+\tilde \epsilon_{it}
+%     \]
+%     with $\tilde y_{it}=y_{it}- \frac{1}{T}\sum_{t=1}^{T}y_{it}$.
+%     \item The fixed effect estimator of $\beta$ is the pooled estimator based on the observations $\{\tilde x_{it}, \tilde y_{it}\}$
+% \end{itemize}
+
+% \end{frame}
+% \begin{frame}{Additive Fixed Effects Model}
+% {\color{gray}\footnotesize \[
+%       y_{it}= \beta x_{it}+\binom{\lambda_{i1}}{\lambda_{i2}}' \binom{f_{t1}}{f_{t2}}+\epsilon_{it}
+%     \]}
+%     More generally, we can consider the case
+
+%     \[
+%     \binom{\lambda_{i1}}{\lambda_{i2}}=\binom{\alpha_1}{1} \text{ and } \binom{f_{t1}}{f_{t2}}=\binom{1}{d_t}.
+%     \]
+
+%     Then we have
+%     \[
+%         y_{it}=x_{it}\beta+\alpha_i+d_t+\epsilon_{it}
+%     \]
+
+%     Such model is called additive fixed effect model.
+
+
+
+
+% \end{frame}
+
+
+% \begin{frame}{Additive Fixed Effects Model}
+% {\color{gray}\footnotesize \[
+%         y_{it}=x_{it}\beta+\alpha_i+d_t+\epsilon_{it}
+%     \]}
+%     \begin{itemize}
+%         \item Transform the model into
+%     \[
+%         \tilde y_{it}=\tilde x_{it}\beta+\tilde \epsilon_{it}
+%     \]
+%     with $\tilde y_{it}=y_{it}-\frac{1}{T}\sum_{t=1}^{T}y_{it}-\frac{1}{N}\sum_{i=1}^{N}y_{it}+\frac{1}{NT}\sum_{i=1}^N\sum_{t=1}^T y_{it}$.
+%     \item Then we can do the pooled estimation again.
+%     \end{itemize}
+
+%     \vspace{5ex}
+
+% \end{frame}
+
+% \begin{frame}{General Interactive Fixed Effects Model}
+%     From now on we study the general case
+%     \[
+%     y_{it}= \beta x_{it}+\binom{\lambda_{i1}}{\lambda_{i2}}' \binom{f_{t1}}{f_{t2}}+\epsilon_{it}.
+%     \]
+
+%     \begin{itemize}
+%         \item In the general case, the fixed effects can not be cancelled out by taking simple average as before.
+%         \item The alternative approach is so-called "quasi-differencing" method.
+%     \end{itemize}
+
+
+
+% \end{frame}
+
+\begin{frame}{Least Square Estimator with Known Numbers of Factors}
+{\color{gray}\footnotesize \[
+       y_{it}= \beta x_{it}+\binom{\lambda_{i1}}{\lambda_{i2}}' \binom{f_{t1}}{f_{t2}}+\epsilon_{it}
+    \]}
+
+    The least square estimator $(\hat\beta,\hat f_{t1},\hat f_{t2}, \hat \lambda_{i1}, \hat \lambda_{i2})$ is a minimiser of the objective function \[
+        \sum_{i=1}^N\sum_{t=1}^T \left| y_{it}-\beta x_{it}-f_{t1}\lambda_{i1}-f_{t2}\lambda_{i2}\right|^2,
+        \]
+    with the condition $\boldsymbol{\hat f_t'}\boldsymbol{\hat f_t}/T=I$ and $\boldsymbol{\hat \lambda_i}'\boldsymbol{\hat \lambda_i}$ is diagonal.
+\end{frame}
+
+
+
+
+\begin{frame}{Asymptotic Theory of the Least Squares Estimator}
+    \begin{enumerate}
+
+        \item Full rank assumption
+        \item (i.i.d. errors) $\epsilon_{it}$ is i.i.d. with mean zero and the eighth moment;
+        \item (Exogeneity) $\epsilon_{it}$ is independent of $x_{it}, \boldsymbol f_t, \boldsymbol \lambda_i$;
+        \item The fixed effects $\boldsymbol f_t$ and $\boldsymbol \lambda_i$ have uniformly bounded eighth moment. And they obey the law of large numbers.
+    \end{enumerate}
+    \begin{itemize}
+        \item The least square estimator $\hat \beta$ converges to the true value in probability as $N \to \infty$ and $T \to \infty$.
+        \item There exists a symmetric matrix $\Omega$ such that
+        \[
+            \sqrt{NT}(\hat \beta-\beta)\xrightarrow{d}N(0,\Omega).
+        \]
+    \end{itemize}
+\end{frame}
+
+
+
+
+% \begin{frame}{Estimation Strategy I}
+%     \begin{itemize}
+%         \item We start with some $\beta^{(0)}$. Then we can choose and $\hat f_t^{(1)}$ and $\lambda_{i}^{(1)}$ that minimise the residual
+%     \[
+%     \sum_{i,t}\left( y_{it}-\beta^{(0)}x_{it}- \lambda_{i1}f_{t1}-\lambda_{i2}f_{t2}\right)^2.
+%     \]
+%         \item Keep $\hat f_t^{(1)}$. We can determine the minimiser $\hat \beta^{(1)}$ of
+%     \[
+%     \sum_{i,t} \left( y_{it}-\beta x_{it}- \lambda_{i1}\hat f_{t1}^{(1)}- \lambda_{i2}\hat f^{(1)}_{t2}\right)^2.
+%     \]
+%     \item Do the above step inductively.
+%     \end{itemize}
+
+
+% \end{frame}
+
+
+
+\begin{frame}{Estimation Strategy}
+
+{\color{gray}\footnotesize \[
+        \operatorname{argmin}_{\beta, f_t, \lambda_i} \sum_{i=1}^N\sum_{t=1}^T \left| y_{it}-\beta x_{it}-f_{t1}\lambda_{i1}-f_{t2}\lambda_{i2}\right|^2,
+    \]}
+    \begin{itemize}
+        \item We start with some $\beta^{(0)}$. Then we can choose $\boldsymbol{\hat\lambda_i^{(1)}}$ and $\boldsymbol{\hat f_t^{(1)}}$ that minimise the residual
+    \[
+    \sum_{i,t}\left( y_{it}-\beta^{(0)}x_{it}- \lambda_{i1}f_{t1}-\lambda_{i2}f_{t2}\right)^2.
+    \]
+        \item Keep both $\boldsymbol{\hat\lambda_i^{(1)}}$ and $\boldsymbol{\hat f_t^{(1)}}$. Determine the minimiser $\hat \beta^{(1)}$ of
+    \[
+    \sum_{i,t} \left( y_{it}-\beta x_{it}- \hat \lambda_{i1}^{(1)}\hat f_{t1}^{(1)}-\hat \lambda^{(1)}_{i2}\hat f^{(1)}_{t2}\right)^2.
+    \]
+    \item Do the above step inductively.
+    \end{itemize}
+
+
+\end{frame}
+
+
+% \begin{frame}{Estimate $\boldsymbol f_t$ and $\boldsymbol \lambda_i$ given $\beta$}
+
+% {
+%     \color{gray}
+%     \footnotesize
+%     Start with some $\beta$, choose $\boldsymbol{\hat f_t}$ and $\boldsymbol{\hat \lambda_{i}}$ that minimise the residual
+%     \[
+%     \sum_{i,t}\left( y_{it}-\beta x_{it}- \lambda_{i1}f_{t1}-\lambda_{i2}f_{t2}\right)^2.
+%     \]
+%     }
+
+
+%     \begin{itemize}
+%         \item Suppose that we are given $\beta$.
+%     \item Set $\mathcal{X}_{it}=y_{it}- \beta x_{it}$. Then $\boldsymbol{\hat f_t}$ and $\boldsymbol{\hat \lambda_i}$ are the least squared estimator of the model
+%     \[
+%         \mathcal{X}_{it}=\lambda_{i1}f_{t1}+\lambda_{i2}f_{t2}+\epsilon_{it}.
+%     \]
+%     \item The first order condition implies that the minimiser $\hat f_{t1}$ and $\hat f_{t2}$ are the eigenvectors corresponding to the largest eigenvalues of the matrix $\mathcal{X}$ and
+%     \[
+%     \lambda_{i1}=\frac{1}{T}\sum_{t=1}^{T}\hat f_{t1}\mathcal{X}_{it} \text{ and }
+%     \lambda_{i2}=\frac{1}{T}\sum_{t=1}^{T}\hat f_{t2}\mathcal{X}_{it}.
+%     \]
+%     \end{itemize}
+
+
+% \end{frame}
+
+
+
+
+
+
+
+% \begin{frame}{Estimate $\beta$ with given $f_t$}
+% {
+%     \color{gray}
+%     \footnotesize
+%     Keep $\hat f_t$ and determine the minimiser $\hat \beta$ of
+%     \[
+%     \sum_{i,t} \left( y_{it}-\beta x_{it}- \lambda_{i1}\hat f_{t1}- \lambda_{i2}\hat f_{t2}\right)^2.
+%     \]
+%     }
+%     \begin{itemize}
+%     \item Suppose that we know $f_t$.
+%     \item The minimiser is the least square estimator of the model
+%     \[
+%     y_{it}=\beta x_{it}+f_{t1}\lambda_{i1}+f_{t2}\lambda_{i2}+\epsilon_{it}.
+%     \]
+%     \item We can use $f_t$ as an intrumental variable to estimate $\beta$:
+%     \[
+%         \hat \beta=\left(\sum_{i=1}^N X_i'M_FX_i\right)^{-1}\sum_{i=1}^{N}X'_iM_FY_i
+%     \]
+%     where $M_F=I_T-F(F'F)^{-1}F$.
+% \end{itemize}
+
+% \end{frame}
+
+% \begin{frame}{Estimate $\beta$ given $\boldsymbol f_t$ and $\boldsymbol\lambda_i$}
+
+% {
+%     \color{gray}
+%     \footnotesize
+%     Keep both $\boldsymbol{\hat f_t}$ and $\boldsymbol{\hat \lambda_i}$ and determine the minimiser $\hat \beta$ of
+%     \[
+%     \sum_{i,t} \left( y_{it}-\beta x_{it}- \hat \lambda_{i1}\hat f_{t1}- \hat \lambda_{i2}\hat f_{t2}\right)^2.
+%     \]
+%     }
+%     \vspace{-3ex}
+%      \begin{itemize}
+%     \item Suppose that we know $\boldsymbol f_t$ and $\boldsymbol \lambda_i$.
+%     \item The minimiser is the least square estimator of the model
+%     \[
+%     y_{it}=\beta x_{it}+f_{t1}\lambda_{i1}+f_{t2}\lambda_{i2}+\epsilon_{it}.
+%     \]
+%     \item Standard OLS theory tells us that:
+%     \[
+%         \hat \beta=\left(\sum_{i=1}^N x_i'x_i\right)^{-1}\left(\sum_{i=1}^{N}x'_i(y_i-f_{t1}\lambda_{i1}-f_{t2}\lambda_{i2})\right).
+%     \]
+
+% \end{itemize}
+
+% \end{frame}
+
+% \begin{frame}{Algorithm}
+
+% 1. Start with a value $\beta^{(0)}$
+
+% for $n=0, 1,2,\ldots$
+
+% 2. Estimate $\boldsymbol f_t^{(n)}$ and $\boldsymbol \lambda_i^{(n)}$ based on $\beta^{(n)}$
+
+% 3. Estimate $\beta^{(n+1)}$ based on $\boldsymbol f_t^{(n)}$ and $\boldsymbol \lambda_i^{(n)}$
+
+
+% 4. Repeat 2-3 until $|\beta^{(n+1)}-\beta^{(n)}|$ is sufficiently small.
+
+
+% \end{frame}
+
+\begin{frame}{Remarks: Starting Values}
+    \begin{itemize}
+        \item The algorithm generates a sequence of random variables.
+        \item Whether it converges to the true value depends on the starting value.
+        \item A popular choice of starting value is the pooled estimator. It is not always optimal.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Remarks: Number of Factors}
+    \begin{itemize}
+        \item So far we have seen the interactive effects estimator $\hat \beta(r)$ with known number of factors $r$.
+        \item In practice, $r$ is usually unknown.
+        \item However, $\hat \beta (s)$ are still consistent if $s\geq r$, where $r$ is the true number of factors. The estimator $\hat \beta (s)$ is less efficient than $\hat \beta (r)$.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Estimation of the Number of Factors}
+    \[
+    y_{it}=\beta x_{it}+\boldsymbol\lambda_i' \boldsymbol f_t+\epsilon_{it}
+    \]
+    \begin{itemize}
+        \item The number $r$ can be estimated consistently, if $\beta$ is known.
+        \item For every natural number $s$, estimate $\boldsymbol {\lambda_i^{(s)}}$ and $\boldsymbol{f_t^{(s)}}$, as $s$ dimensional vectors.
+        \item Calculate the residual $V(s)=y_{it}-\beta x_{it}-\boldsymbol{\hat \lambda_i^{'(s)}}\boldsymbol{\hat f_t^{(s)}}$
+        \item Choose a function $g(N,T)$ that converges to 0 sufficiently fast as $N$ and $T \to \infty$.
+        \item Define the criterion function $C(s)=V(s)+sg(N,T)$.
+        \item The quantity $\hat r$ that minimises $C$ is a consistent estimator of $r$.
+    \end{itemize}
+\end{frame}
+
+
+\begin{frame}{Estimation of Interactive Fixed Effects Models with Unknown Numbers of Factors}
+
+\[
+    y_{it}=\beta x_{it}+\boldsymbol\lambda_i' \boldsymbol f_t+\epsilon_{it}
+\]
+
+We can start with a large $s$, compute $\hat \beta(s)$, estimate $\hat r$ based on $\hat \beta(s)$, and compute $\hat \beta(\hat r)$.
+
+\end{frame}
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\section{Monte Carlo Simulations}
+\begin{frame}{Monte Carlo Simulations}
+
+\begin{itemize}
+    \item Compare the performance of the estimators in different models.
+
+    \item All the plots and tables are replicated under 100 times of simulations.
+
+\end{itemize}
+
+\end{frame}
+
+
+\begin{frame}{Additive Fixed Effects Model}
+   {\color{gray}\footnotesize \[
+        y_{it}= \beta x_{it}+u_{it}
+    \]}
+First let us look at an additive fixed effects model
+$$
+y_{it} = \beta_{1}x_{it,1}+\beta_{2}x_{it,2}+\alpha_{i}+\xi_{t}+\epsilon_{it}.
+$$
+
+\begin{itemize}
+    \item $\beta_1=1, \quad \beta_2=3$.
+    \item Fixed effects: $\alpha_{i}, \xi_{t}\stackrel{\text{i.i.d}}{\sim}N(0,1).$
+    \item Regressor:\\
+    $x_{it,1}=3+2\alpha_i+2\xi_t+\eta_{it,1}$, $\eta_{it,1} \stackrel{\text{i.i.d}}{\sim} N(0,1)$.  \\
+    $x_{it,2}=3+2\alpha_i+2\xi_t+\eta_{it,2}$, $\eta_{it,2} \stackrel{\text{i.i.d}}{\sim} N(0,1)$.
+    \item Error term: $\epsilon_{it}\stackrel{\text{i.i.d}}{\sim} N(0,4)$.
+
+\end{itemize}
+
+\end{frame}
+
+
+
+\begin{frame}{Additive Fixed Effects Model}
+
+\begin{figure}
+\begin{subfigure}{.5\textwidth}
+\centering
+\includegraphics[scale=0.07]{../../bld/figures/range_N_model2/beta1_beta_hat_point.png}
+\end{subfigure}%
+\begin{subfigure}{.5\textwidth}
+\centering
+\includegraphics[scale=0.07]{../../bld/figures/range_N_model2/beta2_beta_hat_point.png}
+\end{subfigure}%
+\centering
+\caption{Estimation of $\beta_1=1$ and $\beta_2=3$}
+\end{figure}
+
+\begin{itemize}
+\item Both estimators are consistent, but within estimator is more efficient than interactive-effects estimator.
+\item Interactive-effects estimator does not work well in small N, but it shows consistency under large sample size.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Additive Fixed Effects Model}
+    \begin{figure}
+\begin{subfigure}{.5\textwidth}
+\centering
+\includegraphics[scale=0.07]{../../bld/figures/range_grid_T_N_model2/beta1_rmse_point_within.png}
+\end{subfigure}%
+\begin{subfigure}{.5\textwidth}
+\centering
+\includegraphics[scale=0.07]{../../bld/figures/range_grid_T_N_model2/beta1_rmse_point_interactive.png}
+\end{subfigure}%
+\centering
+\caption{Estimation of $\beta_1=1$ and $\beta_2=3$}
+\end{figure}
+
+\begin{itemize}
+\item Both estimators are consistent, but within estimator is more efficient than interactive-effects estimator.
+\item Interactive-effects estimator does not work well in small N, but it shows consistency under large sample size.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Starting Values of Interactive-effects Estimator}
+
+\begin{itemize}
+    \item A popular choice of starting value is the pooled estimator. It is not always optimal.
+\end{itemize}
+
+\begin{table}[]
+\begin{tabular}{lllllll}
+ &  & \multicolumn{2}{c}{pooled} &  & \multicolumn{2}{c}{two-way} \\ \hline
+\multicolumn{1}{l|}{N} & \multicolumn{1}{l|}{T} & \multicolumn{1}{l|}{$\beta_1=1$} & \multicolumn{1}{l|}{$\beta_2=3$} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{$\beta_1=1$} & \multicolumn{1}{l}{$\beta_2=3$} \\ \cline{1-4} \cline{6-7}
+\multicolumn{1}{l|}{50} & \multicolumn{1}{l|}{100} & \multicolumn{1}{l|}{1.155} & \multicolumn{1}{l|}{3.156} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{1.057} & \multicolumn{1}{l}{3.060} \\ \cline{1-4} \cline{6-7}
+\multicolumn{1}{l|}{100} & \multicolumn{1}{l|}{50} & \multicolumn{1}{l|}{1.150} & \multicolumn{1}{l|}{3.149} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{1.046} & \multicolumn{1}{l}{3.043} \\ \cline{1-4} \cline{6-7}
+\multicolumn{1}{l|}{100} & \multicolumn{1}{l|}{100} & \multicolumn{1}{l|}{1.120} & \multicolumn{1}{l|}{3.119} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{1.006} & \multicolumn{1}{l}{3.007} \\ \hline
+\end{tabular}
+\end{table}
+
+\begin{itemize}
+     \item We found that two-way estimator works better than pooled estimator in additive fixed effects model.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Interactive Fixed Effects Model}
+{\color{gray}\footnotesize \[
+       y_{it} = \beta_{1}x_{it,1}+\beta_{2}x_{it,2}+\alpha_{i}+\xi_{t}+\epsilon_{it}
+    \]}
+
+Now let us move to a more complex model
+$$
+y_{it} = \beta_{0}+ \beta_{1}x_{it,1}+\beta_{2}x_{it,2}+x_{i}\gamma +w_{t}\delta +\lambda_{i1}f_{t1}+\lambda_{i2}f_{t2}+\epsilon_{it}.
+$$
+
+\begin{itemize}
+    \item $\beta_0=5, \beta_{1}=1, \beta_{2}=3, \gamma=2,\delta=4$.
+    \item Fixed effects: $\lambda_{i,1},\lambda_{i,2},f_{t,1},f_{t,2}\stackrel{\text{i.i.d}}{\sim}N(0,1)$.
+    \item Regressor:\\
+    $x_{it,1}= 1+\lambda_{i1}f_{t1}+\lambda_{i2}f_{t2}+\lambda_{i1}+\lambda_{i2}+f_{t1}+f_{t2}+\eta_{it,1}$.
+    $x_{it,2}= 1+\lambda_{i1}f_{t1}+\lambda_{i2}f_{t2}+\lambda_{i1}+\lambda_{i2}+f_{t1}+f_{t2}+\eta_{it,2}$.
+    $x_{i}=\lambda_{i1}+\lambda_{i2}+e_{i}$, $e_{i} \stackrel{\text{i.i.d}}{\sim} N(0,1)$.\\
+    $w_{t}=f_{t1}+f_{t2}+\eta_{t}$, $\eta_{t} \stackrel{\text{i.i.d}}{\sim} N(0,1)$.
+    \item Error term: $\epsilon_{it}\stackrel{\text{i.i.d}}{\sim}N(0,4)$.
+\end{itemize}
+
+
+
+\end{frame}
+
+
+\begin{frame}{Interactive Fixed Effects Model}
+
+\begin{figure}
+\begin{subfigure}{.5\textwidth}
+\centering
+\includegraphics[scale=0.07]{../../bld/figures/range_N_model4/beta1_beta_hat_point.png}
+\end{subfigure}%
+\begin{subfigure}{.5\textwidth}
+\centering
+\includegraphics[scale=0.07]{../../bld/figures/range_N_model4/beta2_beta_hat_point.png}
+\end{subfigure}%
+\centering
+\caption{Estimation of $\beta_1=1$ and $\beta_2=3$}
+\end{figure}
+
+\begin{itemize}
+    \item Within estimator can only estimate $\beta_{1}$ and $\beta_{2}$, and it is inconsistent.
+    \item Interactive-effects estimator can estimate all the coefficients ($\beta_{0}$, $\beta_{1}$, $\beta_{2}$, $\gamma$, $\delta$) and give consistent estimations.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Interactive Fixed Effects Model}
+
+\begin{figure}
+
+\includegraphics[scale=0.1]{../../bld/figures/range_grid_T_N_model4/beta1_rmse_point_interactive.png}
+\centering
+\caption{MSE of $\beta_1$}
+\end{figure}
+
+\begin{itemize}
+
+    \item MSE decreases as $N$ increases.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Least Square Estimator with Unknown Numbers of Factors}
+\begin{itemize}
+    \item Previously in the models, we know that real factor number is equal to 2. But what would happen if we do not know the real value of $r$?
+    \item Let us look at the cases where number of factors is not correctly estimated.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Least Square Estimator with Unknown Numbers of Factors}
+
+\begin{figure}
+\begin{subfigure}{.5\textwidth}
+\centering
+% TODO: dgp2_r_beta_box.png
+\includegraphics[scale=0.1]{../../bld/figures/range_N_model1/beta1_beta_hat_point.png}
+\end{subfigure}%
+\begin{subfigure}{.5\textwidth}
+\centering
+% TODO: dgp2_r_rmse_point.png
+\includegraphics[scale=0.1]{../../bld/figures/range_N_model1/beta1_beta_hat_point.png}
+\end{subfigure}%
+\centering
+\caption{Estimation of $\beta_1=1$, true $r=2$}
+\end{figure}
+
+\begin{itemize}
+    \item With fewer factor number, it will be biased and inconsistent.
+    \item With more factor number, we have similar bias as the real one but the mean square error is higher.
+\end{itemize}
+
+\end{frame}
+
+
+\begin{frame}{Determine the Number of Factors}
+\begin{itemize}
+    \item We use the method introduced before to estimate the number $r$ of factors in the interactive fixed effect model  $$
+y_{it} = \beta_{0}+ \beta_{1}x_{it,1}+\beta_{2}x_{it,2}+x_{i}\gamma +w_{t}\delta +\lambda_{i1}f_{t1}+\lambda_{i2}f_{t2}+\epsilon_{it}
+$$
+ \item Choose a function $g(N,T)$ that converges to 0 sufficiently fast as $N$ and $T \to \infty$.
+\item Several choice of $g$ are chosen to estimate the number of factors.
+
+Example I:
+\[
+g(N,T)=\frac{N+T}{NT}\log\frac{NT}{N+T}
+\]
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Determine the Number of Factors}
+
+\begin{itemize}
+    \item True $r=2$.
+\end{itemize}
+
+    \begin{table}[]
+\begin{tabular}{l|l|l|l|l|l|l|l}
+\hline
+$N$ & $T$ & I & II & III & IV & V & VI \\ \hline
+100 & 10 & 8 & 8 & 8 & 8 & 8 & 8 \\ \hline
+100 & 20 & 5.1 & 4.22 & 6.58 & 1.88 & 1.78 & 1.96 \\ \hline
+100 & 50 & \textbf{2} & \textbf 2 & 2.94 & \textbf2 & \textbf2 & \textbf2 \\ \hline
+100 & 100 & \textbf2 & \textbf2 & 3.5 & \textbf2 & \textbf2 & \textbf2 \\ \hline
+10 & 100 & 8 & 8 & 8 & 8 & 8 & 8 \\ \hline
+20 & 100 & 5.26 & 4.52 & 6.72 & 1.82 & 1.74 & 1.98 \\ \hline
+50 & 100 & \textbf2 & \textbf2 & 2.96 & \textbf2 & \textbf2 & \textbf2 \\ \hline
+\end{tabular}
+\end{table}
+
+\begin{itemize}
+
+    \item The tables shows that the estimator $\hat r$ is consistent.
+    \item The biased ones are not that bad as well since they overestimate the result.
+\end{itemize}
+
+\end{frame}
+
+
+\begin{frame}{Determine the Number of Factors}
+
+\begin{itemize}
+    \item True $r=2$.
+\end{itemize}
+
+\begin{table}[]
+\begin{tabular}{l|l|l|l|l|l|l|l}
+\hline
+$N$ & $T$ & I & II & III & IV & V & VI \\ \hline
+100 & 40 & \textbf 2 & \textbf 2 & 3.08 & 1.98 & 1.94 & \textbf 2 \\ \hline
+100 & 60 & \textbf 2 & \textbf 2 & 2.88 & \textbf 2 & \textbf 2 & \textbf 2 \\ \hline
+200 & 60 & \textbf 2 & \textbf 2 & \textbf 2 & \textbf 2 & \textbf 2 & \textbf 2 \\ \hline
+500 & 60 & \textbf 2 & \textbf 2 & \textbf 2 & \textbf 2 & \textbf 2 & \textbf 2 \\ \hline
+\end{tabular}
+\end{table}
+
+
+\begin{itemize}
+    \item If we increase the sample size further, we see that all estimators yield the correct number of factors.
+\end{itemize}
+\end{frame}
+
+
+
+
+\end{document}
+
+
+
