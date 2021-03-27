@@ -53,4 +53,8 @@ def paste(*lists, sep=" ", collapse=None):
 
 
 def paste0(*lists, collapse=None):
+    """
+    paste0(..., collapse) is equivalent to paste(..., sep = "", collapse), slightly
+    more efficiently.
+    """
     return paste(*lists, sep="", collapse=collapse)

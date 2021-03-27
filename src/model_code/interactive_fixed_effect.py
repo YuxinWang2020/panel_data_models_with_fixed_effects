@@ -1,3 +1,7 @@
+"""
+Calculate the interactive fixed effect estimator as described in Bai(2009). The
+corresponding theory is in Chapter 3 of our report.
+"""
 import numpy as np
 
 
@@ -70,7 +74,7 @@ class InteractiveFixedEffect:
         for i in range(self.N):
             w_i = self._dependent[:, i] - beta_hat.dot(self._exog[:, :, i])
             wwt = wwt + w_i.T.dot(w_i)
-        w, v = np.linalg.eig(wwt)
+        w, v = np.linalg.eigh(wwt)
         f_hat = np.sqrt(self.T) * v[:, np.argsort(-w)[0:r]]
         return f_hat
 

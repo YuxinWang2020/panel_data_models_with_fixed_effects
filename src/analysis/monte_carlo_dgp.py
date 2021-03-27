@@ -530,3 +530,16 @@ def dgp_interactive_fixed_effects_model_with_common_and_time_invariant_no_iid(
     )
     panel_df = _ndarray_to_panel_df(X, Y)
     return X, Y, panel_df
+
+
+def dgp_random_iid_residual(N, T, r):
+    """
+    Rand residual data generate processor.
+    Residual = Y - beta * X = Lambda * Factor + eps
+    Shape of residual is (N, T).
+    """
+    lambda_ = np.random.normal(loc=0, scale=1, size=(r, N))
+    f = np.random.normal(loc=0, scale=1, size=(r, T))
+    eps = np.random.normal(loc=0, scale=1, size=(N, T))
+    residual = lambda_.T.dot(f) + eps * np.sqrt(r)
+    return residual

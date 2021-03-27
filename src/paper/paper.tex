@@ -1,0 +1,1100 @@
+\documentclass[a4paper]{article}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+\usepackage{setspace}
+\usepackage{multirow}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{threeparttable}
+\usepackage{float}
+\usepackage[toc,page]{appendix}
+\usepackage[breaklinks,colorlinks,linkcolor=black,citecolor=black,urlcolor=black]{hyperref}
+\usepackage{tocbibind}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem*{notation}{Notation}
+
+
+\newcommand{\IR}[0]{\mathbb{R}}
+\newcommand{\IE}[0]{\mathbb{E}}
+\newcommand{\IQ}[0]{\mathbb{Q}}
+\newcommand{\IZ}[0]{\mathbb{Z}}
+\newcommand{\IN}[0]{\mathbb{N}}
+
+
+\onehalfspacing
+
+\setlength{\parindent}{1em}
+\title{Panel Data Models with Fixed Effects}
+\author{Yuxin Wang}
+
+\begin{document}
+\maketitle
+
+
+
+\section{Introduction}
+Consider the following panel data model
+\begin{equation}
+\label{eq:inter_fix_model}
+Y_{it}=X_{it}'\beta+\lambda_i'F_t+\epsilon_{it} \qquad i \in \{1,\ldots,N\}, t\in\{1\ldots, T\},
+\end{equation}
+where $\beta \in \IR^p$, and $Y_{it}:\Omega \to \IR$, $X_{it}:\Omega \to \IR^p$, $\lambda_i:\Omega \to \IR^r$, $F_t: \Omega \to \IR^r$, $\epsilon_{it}: \Omega \to \IR$ are all random variables defined on a probability space $\Omega$. In practice, $Y_{it}$ and $X_{it}$ are observed, the coefficient $\beta$, the factor loadings $\lambda_i$ and factors $F_t$ are unknown, and $\epsilon_{it}$ is the error term. We call the product $\lambda_i'F_t$ \textit{fixed effects}, and the model \ref{eq:inter_fix_model} \textit{interactive fixed effects model with $r$ factors}.
+
+The multiplicative structure of fixed effects contains the traditional time invariant fixed effects or additive fixed effects as special cases.
+Indeed, we obtain
+\begin{equation}\label{time_inv_fix_eff}
+	Y_{it}=X_{it}'\beta+\alpha_i+\epsilon_{it},
+\end{equation}
+if we set $r=1$, $\lambda_i=\alpha_i$ and $F_t=1$. And the additive fixed effects model
+\begin{equation}\label{additive_fix_eff}
+	Y_{it}=X_{it}'\beta+\alpha_i+f_t+\epsilon_{it},
+\end{equation}
+is just the case where
+\[
+r=2, \quad \lambda_i=\binom{\alpha_i}{1}, \text{ and } F_t=\binom{1}{f_t}.
+\]
+
+The estimation of $\beta$ in \eqref{time_inv_fix_eff} and \eqref{additive_fix_eff} are well-documented in standard textbooks (e.g. Greene (2003)). The basic idea is that we can demean the terms in both sides of the equation so that we obtain the transformed data set which can be estimated consistently using OLS. In the more general case \eqref{eq:inter_fix_model}, demeaning becomes difficult. Holtz-Eakin et al. (1988) proposed a quasi-differencing method to overcome this difficulty. Pesaran (2006) proposed the common correlated effects (CCE) approach that takes weighted cross sectional averages of regressors to approximate the unobserved factors. The CCE estimator is shown to be consistent in Su and Jin (2012) and Westerlund et al. (2019) for any fixed $T$ as $N \to \infty$.
+
+Alternatively, Bai (2009) proposed the least squared estimator for $\beta$ assuming that the dimension of factors is known. The factors are estimated by principal component analysis based on Stock and Watson (2002). Moon and Weidner (2015) showed that under stronger conditions on the error term, the least squared estimator is always consistent if one chooses sufficiently many factors.
+
+As a motivation of the fixed effects models we look at the following empirical work by Baltagi and Levin (1992). They studied the demand for cigarettes in US states using the following model:
+\[
+	\log C_{it} =\alpha+\beta_1\log C_{i,t-1}+\beta_2\log P_{it}+\beta_3\log Y_{it}+\beta_4 \log Pn_{it}+u_{it}.
+\]
+Here $i \in \{1,\ldots, 46\}$ is the numbering of the states, $t \in \{1,\ldots, 30\}$ stands for the year between 1963-1992. Moreover, $C$ is the sales of cigarettes per capital, $P$ is the price of cigarettes, $Y$ is per capital disposable income, $J$ is the minimum price of cigarettes in the neighboring states. All of them are measured in real term. The authors claim that the disturbance term can be written as
+\[
+	u_{it}=\alpha_i+f_t+\epsilon_{it},
+\]
+where $\alpha_i$ is the fixed effect that could for instance represent the presence or size of Indian communities with special treatments of cigarettes. Meanwhile, $f_t$ reflects nationwide policy interventions in different time periods to reduce cigarette consumption. We can even assume that $u_{it}$ has the more general form $$u_{it}=\lambda_i'F_t+\epsilon_{it}.$$ The methods introduced later can be used to estimate the slope coefficients in this model.
+
+In this paper we present the main ideas of Bai (2009), Bai and Ng (2002), and Moon and Weidner (2015). We provide the algorithms in Bai (2009) and Bai (2002) in Python, replicate some Monte Carlo simulation results of the papers and investigate the simulation with other data generating processes. In the end, we return to the previous empirical example and look at the estimation using the estimator proposed by Bai (2009).
+
+\section{Notations and Assumptions}
+In this paper we use the following notions for the model
+$$Y_{it}=X_{it}'\beta+\lambda_i'F_t+\epsilon_{it} \qquad i \in \{1,\ldots,N\}, t\in\{1\ldots, T\}:$$
+
+\[
+	\underset{(T\times p)}{X_i}:=
+	\begin{pmatrix}
+			X_{i1}'\\
+			\vdots\\
+			X_{iT}'
+	\end{pmatrix}
+	\qquad
+	 \underset{(T \times 1)}{Y_i}:=
+	 \begin{pmatrix}
+			Y_{i1}\\
+			\vdots\\
+			Y_{iT}
+	\end{pmatrix} \qquad i \in \{1\ldots, N\};
+\]
+\[
+	\underset{(N \times T)}{X^{(k)}}:=
+	\begin{pmatrix}
+		X_{11}^{(k)} & \cdots & X_{1T}^{(k)} \\
+		\vdots & \ddots &\vdots \\
+		X_{N1}^{(k)} &\cdots  & X_{NT}^{(k)},
+	\end{pmatrix}
+	\qquad k \in \{1\ldots, p\}
+\]
+And we set
+\[
+		\underset{(N\times r)}{\Lambda}:=
+		\begin{pmatrix}
+			\lambda_1'\\
+			\vdots\\
+			\lambda_N'
+		\end{pmatrix}
+		\qquad
+		\underset{(T \times r)}{F}:=
+		\begin{pmatrix}
+			F_1'\\
+			\vdots\\
+			F_T'
+		\end{pmatrix}.
+\]
+For any $r \in \IN$, the symbol $I_r$ denotes the $r\times r$ identity matrix.
+
+We make the following assumptions:
+\begin{enumerate}
+	\item The factor loadings $\lambda_i$ are independently and identically distributed with uniformly bounded fourth moments. The time series of factors $F_t$ is ergodic with uniformly bounded fourth moments.
+	\item We have $F'F=TI_r$ and $\Lambda'\Lambda$ is diagonal.
+	\item The error term $\epsilon_{it}$ has mean 0 and has finite eighth moments. Moreover, it is independently and identically distributed across $i$ and $t$.
+	\item The regressors $X_{it}$ are independently and identically distributed across $i$ and are ergodic with respect to $t$. Moreover, they have finite second moments.
+\end{enumerate}
+As in the standard cross-sectional linear regression model, we also require $X_{it}$ satisfies certain full rank conditions. The assumptions above are very restrictive and can be weakened substantially as described in Bai (2009) and Moon and Weidner (2015). For example, assumption 3 rules out the possibility of a lagged dependent variable as a regressor. In the appendix of Bai (2009) it is shown that this restriction can be removed. We also note that assumption 2 serves as the identification of $F_t$ and $\lambda_i$. It is not a binding restriction that affects the estimation of $\beta$.
+
+\section{Interactive Fixed Effects Models}
+
+The estimation of $\beta$ in the special case \eqref{time_inv_fix_eff} with time-invariant fixed effects is well-known. We can take the mean of both sides over time
+\[
+	\bar Y_i=\bar X_i'\beta+\alpha_i+\bar\epsilon_i,
+\]
+and subtract the equation above from \eqref{time_inv_fix_eff} to obtain
+\begin{equation}\label{transformed_model}
+	\tilde Y_{it}=\tilde X_{it}'\beta+\tilde \epsilon_{it},
+\end{equation}
+where
+\[
+	\tilde Y_{it}=Y_{it}-\bar Y_i,\tilde X_{it}=X_{it}-\bar X_i,\tilde \epsilon_{it}=\epsilon_{it}-\bar \epsilon_i.
+\]
+The pooled estimator of $\beta$ in \eqref{transformed_model} is called \textit{within estimator}. The estimation of $\beta$ in \eqref{additive_fix_eff} is similar. We can transform the equation to
+\begin{equation}\label{transformed_model2}
+	\breve Y_{it}=\breve X_{it}'\beta+\breve \epsilon_{it},
+\end{equation}
+where
+
+\[
+	\breve Y_{it}=Y_{it}-\frac{1}{T}\sum_{t=1}^{T}Y_{it}-\frac{1}{N}\sum_{i=1}^{N}Y_{it}+\frac{1}{NT}\sum_{i=1}^N\sum_{t=1}^T Y_{it},
+\]
+and $\breve X_{it}$ and $\breve \epsilon_{it}$ are defined accordingly. Again, we can use the pooled estimator to estimate $\beta$ in \eqref{transformed_model2}. The two within estimators are consistent in the sense that they converge to the true value in probability for any fixed $T$ as $N \to \infty$. In more general cases, transformations along these lines become difficult. Therefore, we will study an M-estimator proposed by Bai (2009) in the rest of this Section.
+
+
+
+
+
+
+\subsection{Definition and Properties of the Estimator}
+
+
+Let the sum of squared residuals function SSR be
+\[
+\text{SSR}(\beta,  F, \Lambda)=\sum_{i=1}^{N}\sum_{t=1}^{T}\left(Y_{it}-X_{it}' \beta- \lambda_i' F_t\right)^2.
+\]
+We define $(\hat \beta, \hat F, \hat \Lambda)$ to be the triple such that the sum of squared residuals is minimized:
+\begin{equation}\label{def_of_estimator}
+	\text{SSR}(\hat \beta, \hat F, \hat \Lambda)=\inf\left\{\text{SSR}(\beta, F, \Lambda): \frac{F'F}{T}=I_r, \Lambda'\Lambda \text{  diagonal}\right\}.
+\end{equation}
+We call $\hat \beta$ the \textit{interactive fixed effects estimator} of $\beta$. Under the assumptions in Section 2, the estimator $\hat \beta$ converges to $\beta$ in probability as $N \to \infty$ and $T \to \infty$. The number of rows of the estimator $\hat F$ increases with $T$. Nevertheless, it can be shown that
+\[
+    \hat F(\hat F'\hat F)^{-1}\hat F \overset{p}{\to} F(F'F)^{-1}F
+\]
+as $N \to \infty$ and $T \to \infty$ (Bai, 2009).
+
+\subsection{Estimation in Practice}
+
+ Because SSR is differentiable, we could solve the optimization problem \eqref{def_of_estimator} by looking for the critical points of SSR, which is analytically and computationally unattractive. Moreover, the estimator $\hat \beta$ does not have a closed form. Bai (2009) therefore proposes one of the following iteration procedures:
+
+1. Begin with some guess $\hat \beta^{(0)}$. Estimate $F_t$ and $\lambda_i$ based on $\hat \beta^{(0)}$. And update the estimation of $\beta$ based on $\hat F_t$.
+
+2. Begin with some guess $\hat \beta^{(0)}$. Estimate $F_t$ and $\lambda_i$ based on $\hat \beta^{(0)}$. And update the estimation of $\beta$ based on $\hat F_t$ and $\hat \lambda_i$.
+
+We still need to elaborate some steps. First we demonstrate how to estimate $F_t$ and $\lambda_i$ if $\beta$ is given. Assume that $\beta$ is known, then we can rewrite \eqref{eq:inter_fix_model} as
+\[
+	Y_{it}-X_{it}'\beta=\lambda_i'F_t+\epsilon_{it},
+\]
+where the left hand side of the equation is known and the right hand side is unknown. We choose $\hat F$ and $\hat \Lambda$ such that SSR($\beta, \hat F, \hat \Lambda$) is minimised. Stock and Watson (2002) present the derivation of a first order necessary condition for $\hat F$ and $\hat \Lambda$. Consequently, the estimator $\hat F(\beta)$ is a $T\times r$ matrix, whose columns are the $r$ eigenvectors corresponding to the $r$ largest eigenvalues (in absolute form) of the matrix
+\begin{equation}\label{mat_for_ev}
+	E(\beta):=\left(Y-\sum_{k=1}^{p}\beta_kX^{(k)}\right)\left(Y-\sum_{k=1}^{p}\beta_kX^{(k)}\right)'.
+\end{equation}
+In practice one needs to note that $\hat F$ should satisfy $\hat F'\hat F/T=I_r$. Most statistics software provides an orthonormal set of eigenvectors of a matrix. So the resulting matrix should be multiplied by $\sqrt T$ to satisfy this condition. Moreover, the first order condition yields the estimator of $\Lambda$:
+\begin{equation}\label{lambda_est}
+	\hat \Lambda(\beta,\hat F)=\frac{1}{T}\left(Y-\sum_{k=1}^{p}\beta_kX^{(k)}\right)'\hat F.
+\end{equation}
+Next we describe how to estimate $\beta$ in the model
+\[
+	Y_{it}=X_{it}'\beta+\lambda_i'F_t+\epsilon_{it}
+\]
+given that only $F_t$ is known.  In this case, we can view $F_t$ as an instrumental variable. The least squared estimator $\hat \beta(F)$ for $\beta$ is
+\begin{equation}\label{est_beta_F}
+	\hat \beta(F)=\left(\sum_{i=1}^{N}X_i'M_FX_i\right)^{-1}\sum_{i=1}^{N}X_i'M_FY_i,
+\end{equation}
+where $M_F$ is defined to be the projection matrix
+\[
+	M_F=I_T-F(F'F)^{-1}F'.
+\]
+Finally, if both $\lambda_i$ and $F_t$ are known, then we can write \eqref{eq:inter_fix_model} as
+\[
+	Y_{it}-\lambda_i'F_t=X_{it}'\beta+\epsilon_{it},
+\]
+where the left hand side of the equation is known. In this case, the least squared estimator $\hat \beta(F,\Lambda)$ is simply
+\begin{equation}\label{est_beta_F_lambda}
+	\hat \beta(F,\Lambda)=\left(\sum_{i=1}^{N}X_i'X_i\right)^{-1}\sum_{i=1}^{N}X_i'(Y_i-F\lambda_i).
+\end{equation}
+
+We summarize the discussion above as two algorithms.
+\subsubsection*{Algorithm 1}
+\begin{enumerate}
+	\item Start with some $\hat \beta^{(0)} \in \IR^p$.
+
+	Suppose we already have $\hat \beta^{(0)}, \ldots, \hat \beta^{(n)}$.
+	\item Set $\hat F^{(n)}=\hat F( \hat \beta^{(n)})$ to be the matrix composed of the $r$ eigenvectors corresponding to the $r$ largest eigenvalues of $E(\hat \beta^{(n)})$ defined in \eqref{mat_for_ev}, such that $\hat F( \hat \beta^{(n)})'\hat F( \hat \beta^{(n)})=TI_r$.
+	\item Set $\hat \beta^{(n+1)}=\hat\beta(\hat F^{(n)})$ according to \eqref{est_beta_F}.
+	\item Repeat 2 and 3 until $|\hat \beta^{(n+1)}-\hat \beta^{(n)}|$ is sufficiently small.
+\end{enumerate}
+
+\subsubsection*{Algorithm 2}
+\begin{enumerate}
+	\item Start with some $\hat \beta^{(0)} \in \IR^p$.
+
+	Suppose we already have $\hat \beta^{(0)}, \ldots, \hat \beta^{(n)}$.
+	\item Set $\hat F^{(n)}=\hat F( \hat \beta^{(n)})$ to be the matrix composed of the $r$ eigenvectors corresponding to the $r$ largest eigenvalues of $E(\hat \beta^{(n)})$, such that $\hat F( \hat \beta^{(n)})'\hat F( \hat \beta^{(n)})=TI_r$.
+	\item Set $\hat \Lambda^{(n)}=\hat \Lambda(\hat \beta^{(n)},\hat F^{(n)})$ according to \eqref{lambda_est}.
+	\item Set $\hat \beta^{(n+1)}=\hat\beta(\hat F^{(n)},\hat \Lambda^{(n)})$ according to \eqref{est_beta_F_lambda}.
+	\item Repeat 2 to 4 until $|\hat \beta^{(n+1)}-\hat \beta^{(n)}|$ is sufficiently small.
+\end{enumerate}
+The advantage of Algorithm 1 is that we do not put as many restrictions in estimating $\beta$ in Step 3 as in Step 4 of Algorithm 2. Nevertheless, Algorithm 2 is preferred in practice because the inverse of the matrix
+\[
+	\sum_{i=1}^{N}X_i'X_i
+\]
+ in \eqref{est_beta_F_lambda} does not need to be updated during the iterations. For this reason, we use Algorithm 2 in our Monte Carlo simulations as well.
+
+Due to the interactive term $\lambda_i'F_t$, the objective function SSR is not globally convex in $\Lambda$ and $F$. Therefore, both algorithms generate a sequence $(\hat \beta^{(n)})_{n \in \IN_0}$ converging to the true value only if the starting value $\hat \beta^{(0)}$ is properly chosen. A common practice is to use the pooled or within estimation for $\hat \beta^{(0)}$.
+
+\subsection{Estimating the Parameter with Unknown Number of Factors}
+We have shown how to estimate $\beta$ consistently given the a priori knowledge about the structure of the fixed effects. In reality, the number of factors is usually unknown. In this section we are going to investigate the properties of the interactive fixed effects estimator if the number of factors is set incorrectly. And we will study a consistent estimator of the number of factors. Based on the analysis above we see how to estimate $\beta$ if the number of factors $r$ is unknown.
+
+\subsubsection{Estimation with Incorrect Number of Factors}
+
+The definition of interactive fixed effects estimator in \eqref{def_of_estimator} is dependent on the dimension $r$ of $F_t$. To make the discussion clear we let $\hat \beta(r)$ denote the estimator if the number of factors is assumed to be $r$. Suppose for now that $F_t$ takes values in $\IR^{r_0}$ in the true model, where $r_0$ is unknown.
+
+In the OLS regression, we can avoid inconsistent estimation of parameters by increasing the number of explanatory variables. A similar phenomenon is observed in Moon and Weidner (2015). They showed that $\hat \beta(r)$ is still consistent if $r\geq r_0$ and $\epsilon_{it}$ are independently and identically normally distributed. If $r<r_0$, then $\hat \beta(r)$ is not consistent.
+
+
+The assumption that the error terms $\epsilon_{it}$ is independently and identically normally distributed is strong. The Monte Carlo simulations in Moon and Weidner (2015) show that the result seems to hold in spite of deviations from this assumption.
+
+ We note that choosing a very large $r$ is not a Pareto improvement  of lack of knowledge of $r_0$, because the convergence rate $\hat \beta^r$ can be shown to be less than $\hat \beta^{r_0}$ in some situation in Moon and Weidner (2015) if $r>r_0$. This is usually the consequence of the overfitting problem as in the OLS regression with too many regressors. And this motivates the need to estimate $r_0$ in the following.
+
+\subsubsection{Estimation of the Number of Factors}
+The parameter $r_0$ can be estimated consistently if $\beta$ and the upper bound $r_{\text{max}}$ of $r_{0}$ are known. Assume that $\beta$ is given in the interactive fixed effects model \eqref{eq:inter_fix_model}. We set $$W_{ij}:=Y_{ij}-X_{ij}'\beta=\lambda_i'F_t+\epsilon_{it}$$ to be the residual. We have seen in Section 3.1 how to estimate $\lambda_i^{(r)}$ and $F_t^{(r)}$ if we assume $\lambda_i$ and $F_t$ take value in $\IR^r$. After obtaining $\lambda_i^{(r)}$ and $F_t^{(r)}$, we set
+\[
+	\hat \epsilon_{it}^{(r)}=W_{ij}-\lambda_i^{(r)\prime}F_t^{(r)}
+\]
+and
+\[
+	V(r)=\sum_{i=1}^{N}\sum_{t=1}^{T}|\hat \epsilon_{it}^{(r)}|^2.
+\]
+Furthermore, we define
+\[
+    PC(r)=V(r)+rg(N,T)
+\]
+and
+\[
+    IC(r)=\log V(r)+rg(N,T).
+\]
+where $g$ is a positive function satisfying $g(N,T)\to 0$ and $\min\{N,T\}g(N,T)\to \infty$ as $N \to \infty$ and $T \to \infty$. The function $g$ is called a penalty function. Intuitively, we wish to choose $r$ such that $V(r)$ is as small as possible. Here we estimate $r_0$ by the minimizer $\hat r$ of $PC$ or $IC$ on $\{1,\ldots, r_{\text{max}}\}$. The term $rg(N,T)$ avoids the choice of too large $r$, hence the overfitting problem. Bai (2002) showed that the estimator $\hat r$ is consistent as $N \to \infty$ and $T \to \infty$.
+
+
+\subsubsection{Estimation of \texorpdfstring{$\beta$}{Lg} with unknown number of factors}
+The previous discussion enables us to estimate $\beta$ \textit{if we have a sufficiently large data set}: We can first estimate $\beta$ assuming a large $r$, which yields a consistent estimator $\hat \beta(r)$. Using $\hat \beta (r)$ we can estimate $r_0$ by the estimator $\hat r$ consistently. Finally, we can estimate $\hat\beta(\hat r)$ again. This method does not work if we only have a small sample size. The reason is that $\hat \beta^r$ is not an efficient estimator for $r\geq r_0$. If we begin with a large $r$, it is likely that the estimation is still far from the true value. We propose that for small data sets we can estimate $\beta$ using various $r$. We know that if $r\leq r_0$, then the estimation is inconsistent, hence is not closed to the true value. If $r$ is much larger than $r_0$, the estimation will also not be closed to the true value as well. So there should be a domain for $r$, where the estimation is around the true value. And we choose the estimation corresponding to the smallest $r$ in this ``stability domain". We will give a more explicit explanation in Section 4 with concrete examples.
+
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+
+\section{Monte Carlo Simulations and an Empirical Example}
+
+We assess the performance of the estimator by Monte Carlo simulations, and apply the method described in Section 3 to real data that we introduced in Section 1. The number of simulations is set to be 1000. We take advantage of MPI to accelerate simulations.
+
+\subsection{Estimation of Slope Coefficients}
+
+We start with a time-invariant fixed effects model
+\begin{equation}\label{model1}
+    Y_{it} = \beta_{1}X_{it,1}+\beta_{2}X_{it,2}+\alpha_{i}+\epsilon_{it},
+\end{equation}
+where ($\beta_1$, $\beta_2$) = (1, 3). The regressors are generated according to
+$X_{it,j}=3+2\alpha_i+\eta_{it,j}$, with $$\eta_{it,j}\stackrel{\text{i.i.d}}{\sim} N(0,1), \qquad j\in \{1,2\},$$ $$\alpha_i\stackrel{\text{i.i.d}}{\sim} N(0,1),$$ $$\epsilon_{it}\stackrel{\text{i.i.d}}{\sim} N(0,4).$$
+
+Table \ref{table:table1} compares how the within estimator and the interactive-effects estimator perform in \eqref{model1}. Both estimators are consistent but the within-group estimator is more efficient than the interactive-effects estimator.
+
+In Figure \ref{figure:figure1}, we visualize the results of estimation for $\beta_1$ and $\beta_2$. The red circles in the plot stand for the interactive-effects estimator, the blue triangles are the within estimator. As the sample size increases from 10 to 100, the points become increasingly concentrated around the true value. The within-group estimator has a lower variance and is closer to the true value than the interactive-effects estimator in each sample size.
+
+In Figure \ref{figure:figure2}, the kernel density curves of both estimators become wider as the sample size increases, showing a higher probability that estimations will take on the true value. Meanwhile, the average median value in the box plot are closer to the true value as well.
+
+In Figure \ref{figure:figure3}, the within estimator has lower root-mean-square error (RMSE) than the interactive-effects estimator. Here we only show the result for $\beta_1$. As sample size increases, the RMSE of both estimators are smaller.
+
+The interactive-effects estimator does not work well in small sample, but it is effective under large $N$ and large $T$. The bias is decreasing with $N$ and $T$, as shown in the theory and confirmed in the simulation.
+
+By adding a time fixed effects $\xi_{t}$ to  \eqref{model1}, we get an additive fixed effects model
+\begin{equation}\label{model2}
+    Y_{it} = \beta_{1}X_{it,1}+\beta_{2}X_{it,2}+\alpha_{i}+\xi_{t}+\epsilon_{it},
+\end{equation}
+where ($\beta_1$, $\beta_2$) = (1, 3). Two fixed effects satisfy $$\alpha_{i}, \xi_{t}\stackrel{\text{i.i.d}}{\sim}N(0,1).$$ Both of them are correlated with the two regressors
+\[
+    X_{it,j}=3+2\alpha_i+2\xi_t+\eta_{it,j},
+\] with
+\[
+    \eta_{it,j}\stackrel{\text{i.i.d}}{\sim} N(0,1) \qquad j\in \{1,2\}.
+\] The error term satisfies $$\epsilon_{it}\stackrel{\text{i.i.d}}{\sim} N(0,4).$$
+
+The simulation result is shown in Table \ref{table:table2} and Figure \ref{figure:figure4}-6. The results are the same as in \eqref{model1}. Both estimators are consistent but the within-group
+estimator is more efficient than the interactive-effects estimator.
+
+Ideally the estimation results of the additive fixed effects model should not depend on the starting values. A popular choice of starting value is the pooled estimator, but it is not always optimal. Table \ref{table:table5} shows that in this model the estimation using interactive effects estimator can be sensitive to the starting values. Two-way estimator works better as starting values than pooled estimator, with its estimation closer to the true value, which is 1 and 3 in  \eqref{model2}.
+
+Next we consider a more general setting
+
+\begin{equation}\label{model3}
+    Y_{it} = \beta_{1}X_{it,1}+\beta_{2}X_{it,2}+ \mu+\lambda_{i}'F_{t}+\epsilon_{it},
+\end{equation}
+where ($\beta_1$, $\beta_2$, $\mu$) = (1, 3, 5),
+\[
+    \lambda_i = \binom{\lambda_{i1}}{\lambda_{i2}} \stackrel{\text{i.i.d}}{\sim} N(0,I_2),
+\]
+\[
+    F_t =\binom{F_{t1}}{F_{t2}}\stackrel{\text{i.i.d}}{\sim}  N(0,I_2),
+\]
+The regressors are generated according to
+ $$X_{it,j}= 1+\lambda_{i1}F_{t1}+\lambda_{i2}F_{t2}+\lambda_{i1}+\lambda_{i2}+F_{t1}+F_{t2}+\eta_{it,j},$$
+ with $$\eta_{it,j}\stackrel{\text{i.i.d}}{\sim} N(0,1) \qquad j\in \{1,2\}.$$ The regressors are correlated with $\lambda_i$, $f_t$, and the product $ \lambda_i' F_t$. The regression error $$\epsilon_{it} \stackrel{\text{i.i.d}}{\sim}N(0,4).$$
+
+Simulation results are reported in Table \ref{table:table3}. In Figures \ref{figure:figure7}-8, we visualize the results and show that the within estimator is inconsistent, while the interactive-effects estimator has consistent estimations for all the coefficients. Figure \ref{figure:figure9} shows that the RMSE of the interactive-effects estimator becomes smaller for coefficients $\beta_1$, $\beta_2$, and $\mu$ as sample sizes increases.
+
+The results remain similar and are shown in Table \ref{table:table8} if we generate $F_{t1}$ and $F_{t2}$ as independent AR(1) series. That is, we set $$F_{t,j}=0.7 \cdot F_{t-1,j}+ u_{t,j},$$
+with
+$$u_{t,j}\stackrel{\text{i.i.d}}{\sim} N(0,1)
+\qquad j\in \{1,2\}. $$
+The other settings are the same as in  \eqref{model3}.
+
+
+
+Finally we consider the model
+\begin{equation}\label{model4}
+    Y_{it} = \beta_{1}X_{it,1}+\beta_{2}X_{it,2}+ \mu+ x_{i}\gamma +w_{t}\delta +\lambda_{i}'F_{t}+\epsilon_{it},
+\end{equation}
+where ($\beta_1$, $\beta_2$, $\mu$, $\gamma$, $\delta$) = (1, 3, 5, 2, 4),
+\[
+    \lambda_i = \binom{\lambda_{i1}}{\lambda_{i2}} \stackrel{\text{i.i.d}}{\sim} N(0,I_2),
+\]
+\[
+    F_t =\binom{F_{t1}}{F_{t2}}\stackrel{\text{i.i.d}}{\sim}N(0,I_2).
+\]
+ The regressors are generated as before:
+ $$X_{it,j}= 1+\lambda_{i1}F_{t1}+\lambda_{i2}F_{t2}+\lambda_{i1}+\lambda_{i2}+F_{t1}+F_{t2}+\eta_{it,j},$$
+ with $$\eta_{it,j}\stackrel{\text{i.i.d}}{\sim} N(0,1) \qquad j\in \{1,2\}.$$
+ Additionally,  we set $$x_{i}=\lambda_{i1}+\lambda_{i2}+e_{i}, \qquad e_{i} \stackrel{\text{i.i.d}}{\sim} N(0,1)$$  and $$w_{t}=F_{t1}+F_{t2}+\eta_{t}, \qquad \eta_{t} \stackrel{\text{i.i.d}}{\sim} N(0,1),$$ so that $x_{i}$ is correlated with
+$\lambda_i$ and $w_t$ is correlated with $f_t$.
+
+The simulation results are summarized in Table \ref{table:table4}. The table shows that the within-group estimator can only estimate $\beta_1$ and $\beta_2$ and they are inconsistent. The interactive-effects estimator gives estimation for all the coefficients and shows consistency. In Figures \ref{figure:figure10}-12 we can see the consistency of interactive-effects more clearly. We also did the simulations, where $F_{t1}$ and $F_{t2}$ are AR(1) processes by setting $$F_{t,j}=0.7 \cdot F_{t-1,j}+ u_{t,j},$$
+with
+$$u_{t,j}\stackrel{\text{i.i.d}}{\sim} N(0,1)
+\qquad j\in \{1,2\}. $$
+The other settings are the same as in  \eqref{model4}. The estimation of the parameters in this case is still consistent, as shown in Table \ref{table:table9}.
+
+
+
+
+\subsection{Estimation of the Number of Factors}
+
+In the previous models, we know that true factor number $r_0$ is equal to 2 when we estimate $\beta$. In practice, the real number of factors is usually unknown. We estimate the parameters of \eqref{model4} by using different numbers of factors.
+
+
+The box plot in Figure \ref{figure:figure13} shows that the estimator $\hat \beta (r)$ is biased and inconsistent if $r < r_0$. However, $\hat \beta (r)$ is still consistent if $r\geq r_0$. As shown in Figure \ref{figure:figure14}, with more factors to estimate the RMSE increases as  $r$ increases. Therefore, overestimating the factor number is less efficient but still consistent, underestimations of the factor number can be worse with biased results. That is why we usually begin estimations with a relatively large number of factors.
+
+We also estimate the number of factors in \eqref{model4}, by choosing three different penalty functions $g_1, g_2, g_3$ together with the criteria $PC$ and $IC$. Table \ref{table:table6} shows that the estimation of $\hat r$ is consistent, where the subscript $_{p1}{\sim}_{p3}$ stand for the penalty functions $g_{1}(N,T) \sim g_{3}(N,T)$ respectively. Table \ref{table:table6}  and Table \ref{table:table7}  shows that the true number of factors can be estimated for sufficiently large data sets.
+
+The penalty functions are given by
+\[
+    g_1(N,T)=\frac{N+T}{NT}\log\frac{NT}{N+T},
+\]
+\[
+    g_2(N,T)=\frac{N+T}{NT}\log\min\{N,T\},
+\]
+\[
+    g_3(N,T)=\frac{1}{\min\{N,T\}}\log\min\{N,T\}.
+\]
+
+
+
+\subsection{Real Data Application}
+We used the methods that we developed so far to estimate the model
+\[
+	\log C_{it} =\alpha+\beta_1\log C_{i,t-1}+\beta_2\log P_{it}+\beta_3\log Y_{it}+\beta_4 \log Pn_{it}+u_{it}.
+\]
+
+that was mentioned in the introduction of this paper. In the paper Baltagi (1992) considered the structure
+\[
+    u_{it}=\alpha_i+f_t+\epsilon_{it}.
+\]
+ The original pooled estimation and within estimation of the paper is reported in Table \ref{table:table12}. We used the pooled estimation as the starting value, and estimate the coefficients of the model with $R \in \{0,\ldots, 10\}$. Table \ref{table:table10} shows that when $r=2$, the estimation does not comply with the results of the additive model assumption in the original paper. We observed that when $r \in \{5,7\}$, the estimation of all coefficients tends to stabilize. This could also be a signal that the true number of factors lies between 5 and 7; the estimations corresponding to $r<5$ are inconsistent, and small sample size does not guarantee that the estimations corresponding to $r>7$ converge. We also estimate the number of factors by inserting the estimations from different $r$. In Table \ref{table:table11}, we estimate $r$ by inserting the estimation of the coefficients based on $r$ chosen in the first column. Moreover we set $r_{\text{max}}=10$. We observe a similar phenomenon as in Moon and Weidner (2015): the most common results are just $r_{\text{max}}=10$. However, we also notice that many estimations lie between 5 and 7, especially when we focus on the estimation of $r$ between the fifth and the seventh line. This is what the theory expects.
+
+
+
+
+
+\clearpage
+\section*{Reference}
+\addcontentsline{toc}{section}{Reference}
+
+\begin{description}
+\item Bai, J. (2009). Panel data models with interactive fixed effects. Econometrica, 77(4), 1229-1279.
+\item Bai, J., \& Ng, S. (2002). Determining the number of factors in approximate factor models. Econometrica, 70(1), 191-221.
+\item Baltagi, B. H., \& Levin, D. (1992). Cigarette taxation: Raising revenues and reducing consumption. Structural Change and Economic Dynamics, 3(2), 321-335.
+\item Greene, W. H. (2003). Econometric analysis. Pearson Education.
+\item Holtz-Eakin, D., Newey, W., \& Rosen, H. S. (1988). Estimating vector autoregressions with panel data. Econometrica: Journal of the econometric society, 1371-1395.
+\item Moon, H. R., \& Weidner, M. (2015). Linear regression for panel with unknown number of factors as interactive fixed effects. Econometrica, 83(4), 1543-1579.
+\item Pesaran, M. H. (2006). Estimation and inference in large heterogeneous panels with a multifactor error structure. Econometrica, 74(4), 967-1012.
+\item Stock, J. H., \& Watson, M. W. (2002). Forecasting using principal components from a large number of predictors. Journal of the American statistical association, 97(460), 1167-1179.
+\item Su, L., \& Jin, S. (2012). Sieve estimation of panel data models with cross section dependence. Journal of Econometrics, 169(1), 34-47.
+\item Westerlund, J. (2019). On estimation and inference in heterogeneous panel regressions with interactive effects. Journal of Time Series Analysis, 40(5), 852-857.
+\end{description}
+
+
+
+
+
+
+
+\newpage
+
+\section*{Appendix}
+\addcontentsline{toc}{section}{Appendix}
+
+\subsection*{Table}
+\addcontentsline{toc}{subsection}{Table}
+
+\begin{table}[h]
+\centering
+
+\caption{Time Invariant Fixed Effects Model}
+\label{table:table1}
+\begin{threeparttable}
+\begin{tabular}{llllll}
+\hline
+N   & T   & \begin{tabular}[c]{@{}l@{}}Mean\\ $\beta_1 = 1$\end{tabular} & SD    & \begin{tabular}[c]{@{}l@{}}Mean\\ $\beta_2 = 3$\end{tabular} & SD    \\ \hline
+\multicolumn{6}{c}{Within-Group Estimator}                                                                                                     \\
+100 & 10  & 0.994                                                       & 0.070  & 3.004                                                       & 0.064 \\
+100 & 20  & 1.002                                                       & 0.046 & 3.000                                                       & 0.046 \\
+100 & 50  & 1.001                                                       & 0.029 & 3.000                                                       & 0.028 \\
+100 & 100 & 1.000                                                       & 0.020  & 3.001                                                       & 0.020  \\
+10  & 100 & 0.999                                                       & 0.064 & 3.002                                                       & 0.065 \\
+20  & 100 & 1.003                                                       & 0.044 & 3.001                                                       & 0.043 \\
+50  & 100 & 0.999                                                       & 0.028 & 3.001                                                       & 0.028 \\
+\multicolumn{6}{c}{Interactive-Effects Estimator}                                                                                                                  \\
+100 & 10  & 1.019                                                       & 0.082 & 3.029                                                       & 0.082 \\
+100 & 20  & 1.019                                                       & 0.059 & 3.017                                                       & 0.058 \\
+100 & 50  & 1.011                                                       & 0.038 & 3.011                                                       & 0.037 \\
+100 & 100 & 1.006                                                       & 0.026 & 3.006                                                       & 0.026 \\
+10  & 100 & 1.038                                                       & 0.103 & 3.043                                                       & 0.103 \\
+20  & 100 & 1.029                                                       & 0.074 & 3.027                                                       & 0.075 \\
+50  & 100 & 1.012                                                       & 0.042 & 3.014                                                       & 0.041 \\
+ \hline
+\end{tabular}
+
+\begin{tablenotes}
+        \footnotesize
+        \item[a]  We report the average value (Mean) and root-mean-square error (SD) of each coefficient over 1000 repetitions in \eqref{model1}.
+        \item[b] The true value of $\beta_1$ and $\beta_2$ are 1 and 3 accordingly.
+      \end{tablenotes}
+\end{threeparttable}
+
+\end{table}
+
+
+
+
+\begin{table}[]
+\caption{Additive Fixed Effects Model I}
+\label{table:table2}
+\centering
+
+\begin{threeparttable}
+
+\begin{tabular}{llllll}
+\hline
+N   & T   & \begin{tabular}[c]{@{}l@{}}Mean\\ $\beta_1 = 1$\end{tabular} & SD    & \begin{tabular}[c]{@{}l@{}}Mean\\ $\beta_2 = 3$\end{tabular} & SD    \\ \hline
+
+\multicolumn{6}{c}{Within Estimator}                                                                                                     \\
+100 & 10  & 1.002                                                       & 0.067 & 3.001                                                       & 0.066 \\
+100 & 20  & 0.999                                                       & 0.046 & 2.998                                                       & 0.047 \\
+100 & 50  & 1.001                                                       & 0.028 & 3.000                                                       & 0.029 \\
+100 & 100 & 0.999                                                       & 0.020 & 3.001                                                       & 0.020 \\
+10  & 100 & 1.000                                                       & 0.070 & 3.003                                                       & 0.067 \\
+20  & 100 & 1.002                                                       & 0.045 & 3.001                                                       & 0.046 \\
+50  & 100 & 1.000                                                       & 0.028 & 3.000                                                       & 0.028 \\
+\multicolumn{6}{c}{Interactive-Effects Estimator}                                                                                                                  \\
+100 & 10  & 1.114                                                       & 0.150 & 3.113                                                       & 0.147 \\
+100 & 20  & 1.100                                                       & 0.134 & 3.100                                                       & 0.135 \\
+100 & 50  & 1.050                                                       & 0.090 & 3.049                                                       & 0.091 \\
+100 & 100 & 1.007                                                       & 0.031 & 3.009                                                       & 0.032 \\
+10  & 100 & 1.117                                                       & 0.153 & 3.119                                                       & 0.153 \\
+20  & 100 & 1.105                                                       & 0.136 & 3.103                                                       & 0.137 \\
+50  & 100 & 1.046                                                       & 0.087 & 3.046                                                       & 0.086 \\ \hline
+\end{tabular}
+
+\begin{tablenotes}
+        \footnotesize
+         \item[a]  We report the average value (Mean) and root-mean-square error (SD) of each coefficient over 1000 repetitions in \eqref{model2}.
+       \item[b] The true value of $\beta_1$ and $\beta_2$ are 1 and 3 accordingly.
+      \end{tablenotes}
+\end{threeparttable}
+
+\end{table}
+
+\clearpage
+
+
+\begin{table}[]
+\caption{Interactive Fixed Effects Model I}
+\label{table:table3}
+\centering
+
+\begin{threeparttable}
+
+\begin{tabular}{llllllll}
+\hline
+N   & T   & \begin{tabular}[c]{@{}l@{}}Mean\\ $\beta_1 = 1$\end{tabular} & SD    & \begin{tabular}[c]{@{}l@{}}Mean\\ $\beta_2 = 3$\end{tabular} & SD    & \begin{tabular}[c]{@{}l@{}}Mean\\ $\mu = 5$\end{tabular} & SD    \\ \hline
+
+\multicolumn{8}{c}{Within-Group Estimator}                                                                                                                                                                          \\
+100 & 10  & 1.225                                                        & 0.234 & 3.226                                                        & 0.236 & NA                                                       & NA    \\
+100 & 20  & 1.224                                                        & 0.229 & 3.220                                                        & 0.224 & NA                                                       & NA    \\
+100 & 50  & 1.221                                                        & 0.223 & 3.222                                                        & 0.224 & NA                                                       & NA    \\
+100 & 100 & 1.222                                                        & 0.224 & 3.221                                                        & 0.222 & NA                                                       & NA    \\
+10  & 100 & 1.215                                                        & 0.226 & 3.216                                                        & 0.227 & NA                                                       & NA    \\
+20  & 100 & 1.218                                                        & 0.223 & 3.218                                                        & 0.223 & NA                                                       & NA    \\
+50  & 100 & 1.220                                                        & 0.223 & 3.221                                                        & 0.224 & NA                                                       & NA    \\
+\multicolumn{8}{c}{Interactive-Effects Estimator}                                                                                                                                                                                       \\
+100 & 10  & 1.073                                                        & 0.140 & 3.070                                                        & 0.137 & 4.527                                                    & 1.266 \\
+100 & 20  & 1.028                                                        & 0.072 & 3.028                                                        & 0.073 & 4.898                                                    & 0.264 \\
+100 & 50  & 1.009                                                        & 0.036 & 3.010                                                        & 0.035 & 4.974                                                    & 0.074 \\
+100 & 100 & 1.005                                                        & 0.023 & 3.004                                                        & 0.023 & 4.989                                                    & 0.043 \\
+10  & 100 & 1.076                                                        & 0.142 & 3.073                                                        & 0.140 & 4.534                                                    & 1.149 \\
+20  & 100 & 1.025                                                        & 0.074 & 3.027                                                        & 0.076 & 4.893                                                    & 0.269 \\
+50  & 100 & 1.007                                                        & 0.036 & 3.007                                                        & 0.034 & 4.979                                                    & 0.072 \\ \hline
+\end{tabular}
+
+\begin{tablenotes}
+        \footnotesize
+        \item[a]  We report the average value (Mean) and root-mean-square error (SD) of each coefficient over 1000 repetitions in \eqref{model3}.
+        \item[b] The true value of $\beta_1$, $\beta_2$ and $\mu$ are 1, 3 and 5 accordingly.
+      \end{tablenotes}
+\end{threeparttable}
+
+\end{table}
+
+
+\begin{table}[]
+\centering
+\caption{\centering Interactive Fixed Effects Model with Common Regressors and Time-invariant Regressors
+ I}
+\label{table:table4}
+
+\begin{threeparttable}
+
+\begin{tabular}{llllllllllll}
+\hline
+N   & T   & \begin{tabular}[c]{@{}l@{}}Mean\\ $\beta_1 = 1$\end{tabular} & SD    & \begin{tabular}[c]{@{}l@{}}Mean\\ $\beta_2 = 3$\end{tabular} & SD    & \begin{tabular}[c]{@{}l@{}}Mean\\ $\mu = 5$\end{tabular} & SD    & \begin{tabular}[c]{@{}l@{}}Mean\\ $\gamma = 2$\end{tabular} & SD    & \begin{tabular}[c]{@{}l@{}}Mean\\ $\delta = 4$\end{tabular} & SD    \\ \hline
+
+\multicolumn{12}{c}{Within-Group Estimator}                                                                                                                                                                                                                                                                                                                                  \\
+100 & 10  & 2.091                                                        & 1.131 & 4.085                                                        & 1.125 & NA                                                       & NA    & NA                                                          & NA    & NA                                                          & NA    \\
+100 & 20  & 2.100                                                        & 1.117 & 4.104                                                        & 1.121 & NA                                                       & NA    & NA                                                          & NA    & NA                                                          & NA    \\
+100 & 50  & 2.105                                                        & 1.112 & 4.102                                                        & 1.108 & NA                                                       & NA    & NA                                                          & NA    & NA                                                          & NA    \\
+100 & 100 & 2.104                                                        & 1.108 & 4.103                                                        & 1.107 & NA                                                       & NA    & NA                                                          & NA    & NA                                                          & NA    \\
+10  & 100 & 2.116                                                        & 1.130 & 4.119                                                        & 1.134 & NA                                                       & NA    & NA                                                          & NA    & NA                                                          & NA    \\
+20  & 100 & 2.115                                                        & 1.123 & 4.112                                                        & 1.120 & NA                                                       & NA    & NA                                                          & NA    & NA                                                          & NA    \\
+50  & 100 & 2.111                                                        & 1.116 & 4.108                                                        & 1.113 & NA                                                       & NA    & NA                                                          & NA    & NA                                                          & NA    \\
+\multicolumn{12}{c}{Interactive-Effects Estimator}                                                                                                                                                                                                                                                                                                                     \\
+100 & 10  & 1.106                                                        & 0.178 & 3.107                                                        & 0.176 & 4.650                                                    & 2.958 & 1.910                                                       & 0.726 & 3.951                                                       & 0.376 \\
+100 & 20  & 1.032                                                        & 0.090 & 3.037                                                        & 0.093 & 5.012                                                    & 1.930 & 1.979                                                       & 0.416 & 3.979                                                       & 0.330 \\
+100 & 50  & 1.010                                                        & 0.039 & 3.008                                                        & 0.039 & 5.059                                                    & 1.142 & 1.982                                                       & 0.395 & 3.977                                                       & 0.407 \\
+100 & 100 & 1.005                                                        & 0.024 & 3.005                                                        & 0.023 & 5.019                                                    & 0.992 & 2.000                                                       & 0.022 & 3.989                                                       & 0.334 \\
+10  & 100 & 1.108                                                        & 0.176 & 3.109                                                        & 0.176 & 4.644                                                    & 2.887 & 1.915                                                       & 0.627 & 3.949                                                       & 0.599 \\
+20  & 100 & 1.037                                                        & 0.090 & 3.039                                                        & 0.094 & 4.950                                                    & 1.527 & 1.986                                                       & 0.198 & 3.972                                                       & 0.468 \\
+50  & 100 & 1.010                                                        & 0.037 & 3.009                                                        & 0.038 & 5.021                                                    & 0.862 & 1.980                                                       & 0.431 & 3.994                                                       & 0.288 \\ \hline
+\end{tabular}
+
+\begin{tablenotes}
+        \footnotesize
+        \item[a]  We report the average value (Mean) and root-mean-square error (SD) of each coefficient over 1000 repetitions.
+        \item[b] In Eq.\eqref{model4}, the true value of $\beta_1$, $\beta_2$, $\mu$, $\gamma$ and $\delta$ are 1, 3, 5, 2, 4 accordingly.
+      \end{tablenotes}
+\end{threeparttable}
+
+\end{table}
+
+
+
+
+\begin{table}[]
+\caption{Starting Values in Additive Fixed Effects Model}
+\label{table:table5}
+\centering
+
+\begin{threeparttable}
+
+\begin{tabular}{lllllll}
+                         &                          & \multicolumn{2}{c}{pooled}                                          &                                        & \multicolumn{2}{c}{two-way}                    \\ \hline
+\multicolumn{1}{l|}{N}   & \multicolumn{1}{l|}{T}   & \multicolumn{1}{l|}{$\beta_1=1$} & \multicolumn{1}{l|}{$\beta_2=3$} & \multicolumn{1}{l|}{\multirow{8}{*}{}} & \multicolumn{1}{l|}{$\beta_1=1$} & $\beta_2=3$ \\ \cline{1-4} \cline{6-7}
+\multicolumn{1}{l|}{10}  & \multicolumn{1}{l|}{100} & \multicolumn{1}{l|}{1.152}       & \multicolumn{1}{l|}{3.151}       & \multicolumn{1}{l|}{}                  & \multicolumn{1}{l|}{1.109}       & 3.110        \\ \cline{1-4} \cline{6-7}
+\multicolumn{1}{l|}{20}  & \multicolumn{1}{l|}{100} & \multicolumn{1}{l|}{1.155}       & \multicolumn{1}{l|}{3.154}       & \multicolumn{1}{l|}{}                  & \multicolumn{1}{l|}{1.103}       & 3.103       \\ \cline{1-4} \cline{6-7}
+\multicolumn{1}{l|}{50}  & \multicolumn{1}{l|}{100} & \multicolumn{1}{l|}{1.154}       & \multicolumn{1}{l|}{3.157}       & \multicolumn{1}{l|}{}                  & \multicolumn{1}{l|}{1.046}       & 3.049       \\ \cline{1-4} \cline{6-7}
+\multicolumn{1}{l|}{100} & \multicolumn{1}{l|}{10}  & \multicolumn{1}{l|}{1.151}       & \multicolumn{1}{l|}{3.154}       & \multicolumn{1}{l|}{}                  & \multicolumn{1}{l|}{1.108}       & 3.111       \\ \cline{1-4} \cline{6-7}
+\multicolumn{1}{l|}{100} & \multicolumn{1}{l|}{20}  & \multicolumn{1}{l|}{1.157}       & \multicolumn{1}{l|}{3.156}       & \multicolumn{1}{l|}{}                  & \multicolumn{1}{l|}{1.101}       & 3.100         \\ \cline{1-4} \cline{6-7}
+\multicolumn{1}{l|}{100} & \multicolumn{1}{l|}{50}  & \multicolumn{1}{l|}{1.157}       & \multicolumn{1}{l|}{3.154}       & \multicolumn{1}{l|}{}                  & \multicolumn{1}{l|}{1.050}        & 3.047       \\ \cline{1-4} \cline{6-7}
+\multicolumn{1}{l|}{100} & \multicolumn{1}{l|}{100} & \multicolumn{1}{l|}{1.121}       & \multicolumn{1}{l|}{3.121}       & \multicolumn{1}{l|}{}                  & \multicolumn{1}{l|}{1.008}       & 3.008       \\ \hline
+\end{tabular}
+
+\begin{tablenotes}
+        \footnotesize
+        \item[a] We report starting values from pooled estimator and two-way estimator for \eqref{model2} over over 1000 repetitions.
+        \item[b] True value of coefficients are presented in column names.
+      \end{tablenotes}
+\end{threeparttable}
+
+\end{table}
+
+
+
+\begin{table}[]
+\caption{\centering Estimations of Factor Number  I}
+\label{table:table6}
+\centering
+
+\begin{threeparttable}
+
+\begin{tabular}{l|l|l|l|l|l|l|l}
+\hline
+N   & T   & $PC_{p1}$ & $PC_{p2}$ & $PC_{p3}$ & $IC_{p1}$ & $IC_{p2}$ & $IC_{p3}$    \\ \hline
+100 & 10  & 8     & 8     & 8     & 8     & 8     & 8     \\ \hline
+100 & 20  & 5.098 & 4.371 & 6.621 & 1.812 & 1.74  & 1.916 \\ \hline
+100 & 50  & 2     & 2     & 2.882 & 1.997 & 1.995 & 2     \\ \hline
+100 & 100 & 2     & 2     & 3.647 & 2     & 2     & 2.001 \\ \hline
+10  & 100 & 8     & 8     & 8     & 8     & 8     & 8     \\ \hline
+20  & 100 & 5.14  & 4.381 & 6.67  & 1.823 & 1.752 & 1.935 \\ \hline
+50  & 100 & 2     & 2     & 2.87  & 2     & 1.993 & 2     \\ \hline
+\end{tabular}
+
+\begin{tablenotes}
+        \footnotesize
+        \item[a]  We report the estimation results of factor number for \eqref{model4} over 1000 repetitions. Table 6 reports the same sample sizes as Table 1-5.
+      \end{tablenotes}
+\end{threeparttable}
+
+\end{table}
+
+
+
+\begin{table}[]
+\caption{\centering Estimations of Factor Number  II}
+\label{table:table7}
+\centering
+
+\begin{threeparttable}
+
+\begin{tabular}{l|l|l|l|l|l|l|l}
+\hline
+N   & T  & $PC_{p1}$ & $PC_{p2}$ & $PC_{p3}$ & $IC_{p1}$ & $IC_{p2}$ & $IC_{p3}$   \\ \hline
+100 & 40 & 2.002 & 2   & 3.179 & 1.994 & 1.981 & 1.999 \\ \hline
+100 & 60 & 2     & 2   & 2.82  & 2     & 1.999 & 2     \\ \hline
+200 & 60 & 2     & 2   & 2     & 2     & 2     & 2     \\ \hline
+500 & 60 & 2     & 2   & 2     & 2     & 2     & 2     \\ \hline
+\end{tabular}
+
+\begin{tablenotes}
+        \footnotesize
+        \item[a]  We report estimation results of factor number for \eqref{model4} over 1000 repetitions. Table 7 reports a larger sample size than Table 6.
+      \end{tablenotes}
+\end{threeparttable}
+
+\end{table}
+
+
+
+
+\begin{table}[]
+\centering
+\caption{Interactive Fixed Effects Model II}
+\label{table:table8}
+
+\begin{threeparttable}
+\begin{tabular}{llllllll}
+\hline
+N   & T   & \begin{tabular}[c]{@{}l@{}}Mean\\      $\beta_1 = 1$\end{tabular} & SD    & \begin{tabular}[c]{@{}l@{}}Mean\\      $\beta_2 = 3$\end{tabular} & SD    & \begin{tabular}[c]{@{}l@{}}Mean\\      $\mu = 5$\end{tabular} & SD    \\ \hline
+\multicolumn{8}{c}{Within-Group   Estimator}                                                                                                                                                                                              \\
+100 & 10  & 1.409                                                             & 0.414 & 3.405                                                             & 0.410 & NA                                                            & NA    \\
+100 & 20  & 1.425                                                             & 0.428 & 3.421                                                             & 0.423 & NA                                                            & NA    \\
+100 & 50  & 1.436                                                             & 0.437 & 3.435                                                             & 0.436 & NA                                                            & NA    \\
+100 & 100 & 1.440                                                             & 0.441 & 3.440                                                             & 0.440 & NA                                                            & NA    \\
+10  & 100 & 1.432                                                             & 0.436 & 3.437                                                             & 0.441 & NA                                                            & NA    \\
+20  & 100 & 1.435                                                             & 0.437 & 3.440                                                             & 0.441 & NA                                                            & NA    \\
+50  & 100 & 1.437                                                             & 0.438 & 3.439                                                             & 0.439 & NA                                                            & NA    \\
+\multicolumn{8}{c}{Interactive-Effects   Estimator}                                                                                                                                                                                       \\
+100 & 10  & 1.092                                                             & 0.160 & 3.088                                                             & 0.158 & 4.686                                                         & 2.187 \\
+100 & 20  & 1.036                                                             & 0.086 & 3.030                                                             & 0.086 & 4.977                                                         & 1.247 \\
+100 & 50  & 1.014                                                             & 0.037 & 3.012                                                             & 0.037 & 4.975                                                         & 0.141 \\
+100 & 100 & 1.010                                                             & 0.024 & 3.010                                                             & 0.023 & 4.977                                                         & 0.047 \\
+10  & 100 & 1.066                                                             & 0.136 & 3.070                                                             & 0.139 & 4.619                                                         & 1.262 \\
+20  & 100 & 1.022                                                             & 0.069 & 3.028                                                             & 0.068 & 4.912                                                         & 0.201 \\
+50  & 100 & 1.011                                                             & 0.035 & 3.013                                                             & 0.035 & 4.969                                                         & 0.073 \\ \hline
+\end{tabular}
+
+\begin{tablenotes}
+        \footnotesize
+        \item[a]  We report the estimation results over 1000 repetitions. We generate Ft1 and Ft2 as independent AR(1) series,
+        the other settings are the same as in  \eqref{model3}.
+      \end{tablenotes}
+\end{threeparttable}
+
+\end{table}
+
+
+\begin{table}[]
+\centering
+\caption{ \centering Interactive Fixed Effects Model with Common Regressors and Time-invariant Regressors II}
+\label{table:table9}
+
+\begin{threeparttable}
+
+\begin{tabular}{llllllllllll}
+\hline
+N   & T   & \begin{tabular}[c]{@{}l@{}}Mean\\      $\beta_1 = 1$\end{tabular} & SD    & \begin{tabular}[c]{@{}l@{}}Mean\\      $\beta_2 = 3$\end{tabular} & SD    & \begin{tabular}[c]{@{}l@{}}Mean\\      $\mu = 5$\end{tabular} & SD    & \begin{tabular}[c]{@{}l@{}}Mean\\      $\gamma = 2$\end{tabular} & SD    & \begin{tabular}[c]{@{}l@{}}Mean\\      $\delta = 4$\end{tabular} & SD    \\ \hline
+\multicolumn{12}{c}{Within-Group   Estimator}                                                                                                                                                                                                                                                                                                                                                   \\
+100 & 10  & 1.409                                                             & 0.414 & 3.405                                                             & 0.410 & NA                                                            & NA    & NA                                                               & NA    & NA                                                               & NA    \\
+100 & 20  & 1.425                                                             & 0.428 & 3.421                                                             & 0.423 & NA                                                            & NA    & NA                                                               & NA    & NA                                                               & NA    \\
+100 & 50  & 1.436                                                             & 0.437 & 3.435                                                             & 0.436 & NA                                                            & NA    & NA                                                               & NA    & NA                                                               & NA    \\
+100 & 100 & 1.440                                                             & 0.441 & 3.440                                                             & 0.440 & NA                                                            & NA    & NA                                                               & NA    & NA                                                               & NA    \\
+10  & 100 & 1.432                                                             & 0.436 & 3.437                                                             & 0.441 & NA                                                            & NA    & NA                                                               & NA    & NA                                                               & NA    \\
+20  & 100 & 1.435                                                             & 0.437 & 3.440                                                             & 0.441 & NA                                                            & NA    & NA                                                               & NA    & NA                                                               & NA    \\
+50  & 100 & 1.437                                                             & 0.438 & 3.439                                                             & 0.439 & NA                                                            & NA    & NA                                                               & NA    & NA                                                               & NA    \\
+\multicolumn{12}{c}{Interactive-Effects   Estimator}                                                                                                                                                                                                                                                                                                                                            \\
+100 & 10  & 1.140                                                             & 0.210 & 3.136                                                             & 0.207 & 4.572                                                         & 2.052 & 1.916                                                            & 0.491 & 3.880                                                            & 0.389 \\
+100 & 20  & 1.067                                                             & 0.139 & 3.062                                                             & 0.137 & 4.946                                                         & 1.706 & 1.951                                                            & 0.335 & 3.915                                                            & 0.404 \\
+100 & 50  & 1.046                                                             & 0.115 & 3.045                                                             & 0.115 & 5.336                                                         & 1.832 & 1.912                                                            & 0.528 & 3.885                                                            & 0.542 \\
+100 & 100 & 1.078                                                             & 0.163 & 3.078                                                             & 0.162 & 5.323                                                         & 1.762 & 1.916                                                            & 0.481 & 3.790                                                            & 0.730 \\
+10  & 100 & 1.155                                                             & 0.234 & 3.161                                                             & 0.241 & 4.625                                                         & 2.487 & 1.868                                                            & 0.427 & 3.837                                                            & 0.517 \\
+20  & 100 & 1.085                                                             & 0.174 & 3.091                                                             & 0.176 & 5.228                                                         & 2.399 & 1.899                                                            & 0.469 & 3.856                                                            & 0.520 \\
+50  & 100 & 1.056                                                             & 0.131 & 3.057                                                             & 0.133 & 5.459                                                         & 1.959 & 1.907                                                            & 0.553 & 3.825                                                            & 0.693 \\ \hline
+\end{tabular}
+
+\begin{tablenotes}
+        \footnotesize
+        \item[a]  We report the estimation results over 1000 repetitions. We generate Ft1 and Ft2 as independent AR(1) series, that is, $F_{t,1}=0.7*F_{t-1,1}+ u_t$, with $u_t\stackrel{\text{i.i.d}}{\sim} N(0,1)$.
+        The other settings are the same as in  \eqref{model4}.
+      \end{tablenotes}
+\end{threeparttable}
+
+\end{table}
+
+
+\clearpage
+
+\begin{table}[]
+\centering
+\caption{ LS Estimation Results. Cigarette Demand Equation 1963–92}
+\label{table:table10}
+\begin{threeparttable}
+\begin{tabular}{llllll}
+\hline
+Factor number & Intercept & ln $C_{i,t-1}$ & ln $P_{i,t}$ & ln $Pn_{i,t}$ & ln $Y_{i,t}$ \\ \hline
+R=0           & 0.278     & 0.969          & -0.090       & 0.024         & -0.031       \\
+R=1           & 0.467     & 0.905          & -0.225       & 0.075         & 0.009        \\
+R=2           & 0.887     & 0.581          & -0.357       & 0.109         & 0.284        \\
+R=3           & 0.472     & 0.910          & -0.196       & 0.060         & 0.003        \\
+R=4           & 2.119     & 0.363          & -0.359       & 0.115         & 0.252        \\
+R=5           & 1.563     & 0.333          & -0.343       & 0.047         & 0.396        \\
+R=6           & 1.075     & 0.428          & -0.319       & 0.046         & 0.396        \\
+R=7           & 1.999     & 0.335          & -0.331       & 0.042         & 0.299        \\
+R=8           & 3.491     & 0.027          & -0.334       & 0.054         & 0.317        \\
+R=9           & 5.136     & -0.159         & -0.290       & 0.091         & 0.167        \\
+R=10          & 6.005     & -0.265         & -0.247       & 0.078         & 0.094        \\ \hline
+\end{tabular}
+
+        \begin{tablenotes}
+        \footnotesize
+        \item[a] We report the estimation results over 1000 repetitions.
+        \item[b] R $\in \{0,2,...10\}$ is the factor number used for estimation.
+      \end{tablenotes}
+      \end{threeparttable}
+
+\end{table}
+
+
+
+\begin{table}[]
+\centering
+\caption{Estimation of Factor Number. Cigarette Demand Equation 1963–92*}
+\label{table:table11}
+
+    \begin{threeparttable}
+        \begin{tabular}{lllllll}
+\hline
+ $R$ & $PC_{p1}$ & $PC_{p2}$ & $PC_{p3}$ & $IC_{p1}$ & $IC_{p2}$ & $IC_{p3}$ \\ \hline
+1  & 9         & 9         & 10        & 5         & 2         & 10        \\
+2  & 10        & 8         & 10        & 6         & 2         & 10        \\
+3  & 9         & 9         & 10        & 5         & 2         & 10        \\
+4  & 10        & 9         & 10        & 8         & 4         & 10        \\
+5  & 10        & 9         & 10        & 7         & 5         & 10        \\
+6  & 10        & 9         & 10        & 6         & 5         & 10        \\
+7  & 10        & 9         & 10        & 8         & 4         & 10        \\
+8  & 10        & 9         & 10        & 10        & 8         & 10        \\
+9  & 10        & 10        & 10        & 10        & 10        & 10        \\
+10 & 10        & 10        & 10        & 10        & 10        & 10        \\ \hline
+        \end{tabular}
+
+        \begin{tablenotes}
+        \footnotesize
+        \item[*] We set $r_{\text{max}}$=10, and report the estimation results under 1000 repetitions.
+      \end{tablenotes}
+    \end{threeparttable}
+
+\end{table}
+
+
+\begin{table}[]
+\centering
+\caption{Estimation of Cigarette Demand Equations in Baltagi (1992)*}
+\label{table:table12}
+
+\begin{threeparttable}
+
+\begin{tabular}{lllll}
+\hline
+       & ln $C_{i,t-1}$ & ln $P_{i,t}$ & ln $Pn_{i,t}$ & ln $Y_{i,t}$ \\ \hline
+OLS    & 0.969         & -0.090      & 0.024        & -0.031       \\
+Within & 0.833         & -0.299      & 0.034        & 0.100        \\ \hline
+\end{tabular}
+
+ \begin{tablenotes}
+        \footnotesize
+        \item[*] This is a replication of Table 8.1 in Baltagi(1992). We only report the OLS and within estimation results over 1000 repetitions.
+      \end{tablenotes}
+    \end{threeparttable}
+
+\end{table}
+
+
+\clearpage
+
+\subsection*{Figure}
+\addcontentsline{toc}{subsection}{Figure}
+
+% model 1
+\begin{figure}[h]
+%\begin{subfigure}{.5\textwidth}
+\centering
+\includegraphics[scale=0.147]{../../bld/figures/range_N_model1/beta1_beta_hat_point.png}
+%\end{subfigure}%
+%\begin{subfigure}{.5\textwidth}
+\centering
+\includegraphics[scale=0.147]{../../bld/figures/range_N_model1/beta2_beta_hat_point.png}
+%\end{subfigure}%
+\centering
+\caption{Time Invariant Fixed Effects Model}
+\label{figure:figure1}
+\end{figure}
+
+\clearpage
+
+\begin{figure}[h]
+\centering
+\includegraphics[scale=0.12]{../../bld/figures/range_N_model1/beta1_beta_hat_violin.png}
+\centering
+\includegraphics[scale=0.12]{../../bld/figures/range_N_model1/beta2_beta_hat_violin.png}
+\centering
+\caption{Time Invariant Fixed Effects Model}
+\label{figure:figure2}
+\end{figure}
+
+\clearpage
+
+\begin{figure}[h]
+%\begin{subfigure}{.5\textwidth}
+\centering
+\includegraphics[scale=0.15]{../../bld/figures/range_grid_T_N_model1/beta1_rmse_point_within.png}
+%\end{subfigure}%
+%\begin{subfigure}{.5\textwidth}
+\centering
+\includegraphics[scale=0.15]{../../bld/figures/range_grid_T_N_model1/beta1_rmse_point_interactive.png}
+%\end{subfigure}%
+\centering
+\caption{Time Invariant Fixed Effects Model}
+\label{figure:figure3}
+\end{figure}
+
+
+\clearpage
+
+% model 2
+
+
+\begin{figure}[h]
+%\begin{subfigure}{.5\textwidth}
+\centering
+\includegraphics[scale=0.15]{../../bld/figures/range_N_model2/beta1_beta_hat_point.png}
+%\end{subfigure}%
+%\begin{subfigure}{.5\textwidth}
+\centering
+\includegraphics[scale=0.15]{../../bld/figures/range_N_model2/beta2_beta_hat_point.png}
+%\end{subfigure}%
+\centering
+\caption{Additive Fixed Effects Model}
+\label{figure:figure4}
+\end{figure}
+
+\clearpage
+
+\begin{figure}[h]
+\centering
+\includegraphics[scale=0.12]{../../bld/figures/range_N_model2/beta1_beta_hat_violin.png}
+\centering
+\includegraphics[scale=0.12]{../../bld/figures/range_N_model2/beta2_beta_hat_violin.png}
+\centering
+\caption{Additive Fixed Effects Model}
+\label{figure:figure5}
+\end{figure}
+
+\clearpage
+
+\begin{figure}[h]
+%\begin{subfigure}{.5\textwidth}
+\centering
+\includegraphics[scale=0.15]{../../bld/figures/range_grid_T_N_model2/beta1_rmse_point_within.png}
+%\end{subfigure}%
+%\begin{subfigure}{.5\textwidth}
+\centering
+\includegraphics[scale=0.15]{../../bld/figures/range_grid_T_N_model2/beta1_rmse_point_interactive.png}
+%\end{subfigure}%
+\centering
+\caption{Additive Fixed Effects Model}
+\label{figure:figure6}
+\end{figure}
+
+\clearpage
+% model 3
+\begin{figure}[h]
+% \begin{subfigure}{.5\textwidth}
+\centering
+\includegraphics[scale=0.1]{../../bld/figures/range_N_model3/beta1_beta_hat_point.png}
+% \end{subfigure}%
+% \begin{subfigure}{.5\textwidth}
+\centering
+\includegraphics[scale=0.1]{../../bld/figures/range_N_model3/beta2_beta_hat_point.png}
+% \end{subfigure}%
+\centering
+\includegraphics[scale=0.1]{../../bld/figures/range_N_model3/mu_beta_hat_point.png}
+\centering
+\caption{Interactive Fixed Effects Model}
+\label{figure:figure7}
+\end{figure}
+
+\clearpage
+\begin{figure}[h]
+\centering
+\includegraphics[scale=0.12]{../../bld/figures/range_N_model3/beta1_beta_hat_violin.png}
+\centering
+\includegraphics[scale=0.12]{../../bld/figures/range_N_model3/beta2_beta_hat_violin.png}
+\centering
+\includegraphics[scale=0.12]{../../bld/figures/range_N_model3/mu_beta_hat_violin.png}
+\centering
+\caption{Interactive Fixed Effects Model}
+\label{figure:figure8}
+\end{figure}
+
+\clearpage
+\begin{figure}[]
+%\begin{subfigure}{.5\textwidth}
+\centering
+\includegraphics[scale=0.15]{../../bld/figures/range_grid_T_N_model3/beta1_rmse_point_interactive.png}
+%\end{subfigure}%
+%\begin{subfigure}{.5\textwidth}
+\centering
+\includegraphics[scale=0.15]{../../bld/figures/range_grid_T_N_model3/beta2_rmse_point_interactive.png}
+%\end{subfigure}%
+\centering
+\includegraphics[scale=0.15]{../../bld/figures/range_grid_T_N_model3/mu_rmse_point_interactive.png}
+\centering
+\caption{Interactive Fixed Effects Model}
+\label{figure:figure9}
+\end{figure}
+
+\clearpage
+
+% model 4
+\begin{figure}[]
+%\begin{subfigure}{.5\textwidth}
+\centering
+\includegraphics[scale=0.15]{../../bld/figures/range_N_model4/beta1_beta_hat_point.png}
+%\end{subfigure}%
+%\begin{subfigure}{.5\textwidth}
+\centering
+\includegraphics[scale=0.15]{../../bld/figures/range_N_model4/beta2_beta_hat_point.png}
+%\end{subfigure}%
+%\begin{subfigure}{.5\textwidth}
+\centering
+\includegraphics[scale=0.15]{../../bld/figures/range_N_model4/mu_beta_hat_point.png}
+%\end{subfigure}%
+\centering
+\caption{\centering Interactive Fixed Effects Model with Common Regressors and Time-invariant Regressors}
+\label{figure:figure10}
+\end{figure}
+
+\clearpage
+\begin{figure}[h]
+\centering
+\includegraphics[scale=0.12]{../../bld/figures/range_N_model4/beta1_beta_hat_violin.png}
+\centering
+\includegraphics[scale=0.12]{../../bld/figures/range_N_model4/beta2_beta_hat_violin.png}
+\centering
+\includegraphics[scale=0.12]{../../bld/figures/range_N_model4/mu_beta_hat_violin.png}
+\centering
+\caption{\centering Interactive Fixed Effects Model with Common Regressors and Time-invariant Regressors}
+\label{figure:figure11}
+\end{figure}
+
+\clearpage
+\begin{figure}[ht]
+% \begin{subfigure}{.5\textwidth}
+\centering
+\includegraphics[scale=0.15]{../../bld/figures/range_grid_T_N_model4/beta1_rmse_point_interactive.png}
+% \end{subfigure}%
+% \begin{subfigure}{.5\textwidth}
+\centering
+\includegraphics[scale=0.15]{../../bld/figures/range_grid_T_N_model4/beta2_rmse_point_interactive.png}
+% \end{subfigure}%
+\centering
+\includegraphics[scale=0.15]{../../bld/figures/range_grid_T_N_model4/mu_rmse_point_interactive.png}
+\centering
+\caption{\centering Interactive Fixed Effects Model with Common Regressors and Time-invariant Regressors}
+\label{figure:figure12}
+\end{figure}
+
+
+\clearpage
+\begin{figure}[ht]
+% \begin{subfigure}{.5\textwidth}
+\centering
+\includegraphics[scale=0.15]{../../bld/figures/range_grid_T_N_model4/beta1_rmse_point_interactive.png}
+% \end{subfigure}%
+% \begin{subfigure}{.5\textwidth}
+\centering
+\includegraphics[scale=0.15]{../../bld/figures/range_grid_T_N_model4/beta2_rmse_point_interactive.png}
+% \end{subfigure}%
+\centering
+\includegraphics[scale=0.15]{../../bld/figures/range_grid_T_N_model4/mu_rmse_point_interactive.png}
+\centering
+\caption{\centering Interactive Fixed Effects Model with Common Regressors and Time-invariant Regressors}
+\label{figure:figure13}
+\end{figure}
+
+
+\newpage
+
+\begin{figure}[]
+%\begin{subfigure}{.5\textwidth}
+
+\centering
+\includegraphics[scale=0.15]{../../bld/figures/range_r_model4/beta1_rmse_point_interactive.png}
+%\end{subfigure}%
+%\begin{subfigure}{.5\textwidth}
+\centering
+\includegraphics[scale=0.15]{../../bld/figures/range_r_model4/beta2_rmse_point_interactive.png}
+%\end{subfigure}%
+\centering
+\caption{}
+\label{figure:figure14}
+\end{figure}
+
+
+\end{document}
