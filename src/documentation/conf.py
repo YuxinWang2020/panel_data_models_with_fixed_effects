@@ -46,7 +46,7 @@ master_doc = "index"
 
 # General information about the project.
 project = "Panel Data Models with Fixed Effects"
-copyright = "2019-, Yuxin Wang"
+copyright = "2021-March, Yuxin Wang"
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the

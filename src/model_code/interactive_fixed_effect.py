@@ -1,3 +1,7 @@
+"""
+Calculate the interactive fixed effect estimator as described in Bai(2009). The
+corresponding theory is in Chapter 3 of our report.
+"""
 import numpy as np
 
 

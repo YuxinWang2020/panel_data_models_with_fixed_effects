@@ -1,7 +1,5 @@
 .. This the Panel Data Models with Fixed Effects project's documentation master file.
 
-.. You can adapt this file completely to your liking,
-.. but it should at least contain the `toctree` directive.
 
 
 Welcome to the Panel Data Models with Fixed Effects project's documentation!
@@ -17,6 +15,5 @@ Welcome to the Panel Data Models with Fixed Effects project's documentation!
     final
     model_code
     model_specs
-    library
     paper
     references

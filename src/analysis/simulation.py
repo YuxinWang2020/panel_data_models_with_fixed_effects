@@ -167,6 +167,26 @@ def simulation_coefficient(
 
 
 def statistics_coefficient(all_N, all_T, nsims, df_sim_result, **beta_true):
+    """
+    Generate statistics of each N & T, take the mean of different simulations, and
+    store them in a data frame including mean, bias, rmse, standard error and cofidence
+    interval.
+
+    Parameters
+    ----------
+    all_N : array-like
+        All sample size of entity
+    all_T : array-like
+        All sample size of time
+    nsims : int
+        Simulation times for the same N and T
+    df_sim_result : DataFrame
+        Simulation result from function `simulation_coefficient`
+    beta_true : float
+        Coefficient of variables used in dgp_func. Values in ("beta1", "beta2", "mu",
+        "gamma", "delta")
+
+    """
     # vectorize startswith() to apply it in a string list
     startswith_vec = np.vectorize(str.startswith)
     # guess number of variables from column names
