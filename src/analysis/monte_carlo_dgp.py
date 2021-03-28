@@ -357,19 +357,24 @@ def dgp_additive_fixed_effects_model_no_iid(T, N, *, beta1, beta2, **kw):
     .. math::
         y_{it} = \beta_{1}x_{it,1}+\beta_{2}x_{it,2}+\alpha_{i}+\xi_{t}+\epsilon_{it}
     Two fixed effects satisfy
+
     .. math::
-        \alpha_{i}, \xi_{t}\stackrel{\text{i.i.d}}{\sim}N(0,1).
-    Both of them are correlated with the two regressors
+        \alpha_{i} \stackrel{\text{i.i.d}}{\sim}N(0,1).
+        \xi_{t}=0.7 \cdot \xi_{t-1}+ u_{t},
+    with:
+
     .. math::
-        \[
-            X_{it,j}=3+2\alpha_i+2\xi_t+\eta_{it,j},
-        \]
+        u_{t}\stackrel{\text{i.i.d}}{\sim} N(0,1) \qquad j\in \{1,2\}.
+    Both of two fixed effects are correlated with the two regressors
+
+    .. math::
+        X_{it,j}=3+2\alpha_i+2\xi_t+\eta_{it,j},
     with
+
     .. math::
-        \[
-            \eta_{it,j}\stackrel{\text{i.i.d}}{\sim} N(0,1) \qquad j\in \{1,2\}.
-        \]
-    The regression error
+        \eta_{it,j}\stackrel{\text{i.i.d}}{\sim} N(0,1) \qquad j\in \{1,2\}.
+    The error term satisfies
+
     .. math::
         \epsilon_{it} \stackrel{\text{i.i.d}}{\sim}N(0,4).
     """
@@ -428,24 +433,30 @@ def dgp_interactive_fixed_effects_model_no_iid(T, N, *, beta1, beta2, mu, **kw):
     .. math::
         y_{it} = \beta_{1}x_{it,1}+\beta_{2}x_{it,2}+\mu+\lambda_{i}'F_{t}+\epsilon_{it}
     where
+
     .. math::
-    \[
         \lambda_i = \binom{\lambda_{i1}}{\lambda_{i2}} \stackrel{\text{i.i.d}}{\sim}
         N(0,I_2),
-    \]
-    \[
-        F_t =\binom{F_{t1}}{F_{t2}}\stackrel{\text{i.i.d}}{\sim}  N(0,I_2),
-    \]
+        F_{t,j}=0.7 \cdot F_{t-1,j}+ u_{t,j},
+
+    with:
+
+    .. math::
+        u_{t,j}\stackrel{\text{i.i.d}}{\sim} N(0,1) \qquad j\in \{1,2\}.
+
     The regressors are generated according to:
+
     .. math::
         X_{it,j}= 1+\lambda_{i1}F_{t1}+\lambda_{i2}F_{t2}+\lambda_{i1}+\lambda_{i2}+
         F_{t1}+F_{t2}+\eta_{it,j},
     with
+
     .. math::
         \eta_{it,j}\stackrel{\text{i.i.d}}{\sim} N(0,1) \qquad j\in \{1,2\}.
     The regressors are correlated with :math:`\lambda_i`, :math:`f_t`, and the product
     :math:`\lambda_i' F_t`.
-    The regression error
+    The error term satisfies
+
     .. math::
         \epsilon_{it} \stackrel{\text{i.i.d}}{\sim}N(0,4).
     """
@@ -501,26 +512,32 @@ def dgp_interactive_fixed_effects_model_with_common_and_time_invariant_no_iid(
         y_{it} = \beta_{1}x_{it,1}+\beta_{2}x_{it,2}+ \mu+ x_{i}\gamma +w_{t}\delta +
         \lambda_{i}'F_{t}+\epsilon_{it}
     where
+
     .. math::
-    \[
         \lambda_i = \binom{\lambda_{i1}}{\lambda_{i2}} \stackrel{\text{i.i.d}}{\sim}
         N(0,I_2),
-    \]
-    \[
-        F_t =\binom{F_{t1}}{F_{t2}}\stackrel{\text{i.i.d}}{\sim}N(0,I_2).
-    \]
+        F_{t,j}=0.7 \cdot F_{t-1,j}+ u_{t,j},
+    with:
+
+    .. math::
+        u_{t,j}\stackrel{\text{i.i.d}}{\sim} N(0,1) \qquad j\in \{1,2\}.
+
     The regressors are generated according to:
+
     .. math::
         X_{it,j}= 1+\lambda_{i1}F_{t1}+\lambda_{i2}F_{t2}+\lambda_{i1}+\lambda_{i2}+
         F_{t1}+F_{t2}+\eta_{it,j},
     with
+
     .. math::
         \eta_{it,j}\stackrel{\text{i.i.d}}{\sim} N(0,1) \qquad j\in \{1,2\}.
     Additionally,  we set
+
     .. math::
         x_{i}=\lambda_{i1}+\lambda_{i2}+e_{i},
         \qquad e_{i} \stackrel{\text{i.i.d}}{\sim} N(0,1)
     and
+
     .. math::
         w_{t}=F_{t1}+F_{t2}+\eta_{t},
         \qquad \eta_{t} \stackrel{\text{i.i.d}}{\sim} N(0,1),
