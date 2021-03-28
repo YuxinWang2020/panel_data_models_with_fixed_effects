@@ -1,3 +1,7 @@
+"""
+Compute the logarithm of all variables and adjust the monetary variables for the general
+consumer price index. Also compute a lagged consumption variable.
+"""
 import numpy as np
 import pandas as pd
 import pytask
