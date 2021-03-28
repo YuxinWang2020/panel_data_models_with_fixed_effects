@@ -23,7 +23,6 @@ from src.model_code.factor_estimator import FactorEstimator
 from src.model_code.interactive_fixed_effect import InteractiveFixedEffect
 
 
-@pytask.mark.skip
 @pytask.mark.depends_on(SRC / "model_specs" / "range_r_model4.json")
 @pytask.mark.produces(
     {
