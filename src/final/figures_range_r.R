@@ -11,7 +11,7 @@ simulate_param <- fromJSON(file = input[["simulate"]])
 sim_result <- read.csv(input[["sim_result"]])
 statistic <- read.csv(input[["statistic"]])
 out_dir <- input[["out_dir"]]
-dir.create(out_dir, showWarnings = F)
+dir.create(out_dir, showWarnings = F, recursive = TRUE)
 
 # get parameters #
 r_N <- statistic$N[1] # sample sizes of N
