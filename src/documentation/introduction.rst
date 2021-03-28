@@ -18,7 +18,7 @@ The logic of this project works by step of the analysis:
 1. Data management
 2. Monte Carlo simulations and real data application
 3. Visualisation and results formatting
-4. Research paper and presentations
+4. Research paper and presentation
 
 The main part of this project is Monte Carlo simulations and real data estimation. See section :ref:`monte_carlo_simulations_and_real_data_application` for more detail.
 

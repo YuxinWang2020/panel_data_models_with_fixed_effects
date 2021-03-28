@@ -10,7 +10,7 @@ The logic of this project works by step of the analysis:
 1. Data management
 2. Monte Carlo simulations and real data application
 3. Visualisation and results formatting
-4. Research paper and presentations
+4. Research paper and presentation
 
 
 ## Monte Carlo Simulations and Real Data Application
@@ -22,7 +22,7 @@ The logic of this project works by step of the analysis:
     2. Monte carlo simulations under ARI time fixed effects
     3. Starting Values in the additive fixed effects model
 2. Estimation of the number of factors
-    1. Estimate the parameters in interactive fixed effects model by using different numbers of factors
+    1. Estimate parameters in interactive fixed effects model by using different numbers of factors
     2. Estimate factor numbers in interactive fixed effects model by choosing different penalty functions and criterias
 3. Real data application
     1. Use a panel data set of 46 observations from 1963 to 1992

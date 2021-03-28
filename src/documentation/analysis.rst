@@ -13,7 +13,7 @@ The analysis in this project contains three aspects:
     2. Monte carlo simulations under ARI time fixed effects
     3. Starting Values in the additive fixed effects model
 2. Estimation of the number of factors
-    1. Estimate the parameters in interactive fixed effects model by using different numbers of factors
+    1. Estimate parameters in interactive fixed effects model by using different numbers of factors
     2. Estimate factor numbers in interactive fixed effects model by choosing different penalty functions and criterias
 3. Real data application
     1. Use a panel data set of 46 observations from 1963 to 1992
