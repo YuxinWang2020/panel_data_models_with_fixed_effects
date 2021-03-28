@@ -36,12 +36,16 @@ Data Generating process for Monte Carlo Simulation
     :members:
 
 
+.. _src_analysis_simulation:
+
 Monte Carlo Simulation
 ====================================================
 
 .. automodule:: src.analysis.simulation
     :members:
 
+
+.. _src_analysis_task_simulation_coefficient:
 
 Estimation of slope coefficients
 ====================================================

@@ -30,6 +30,7 @@ def dgp_time_invariant_fixed_effects_model(T, N, *, beta1, beta2, **kw):
     -----
     .. math::
         y_{it} = \beta_{1}x_{it,1}+\beta_{2}x_{it,2}+\alpha_{i}+\epsilon_{it}
+
     The regressors are generated according to :math:`X_{it,j}=3+2\alpha_i+\eta_{it,j}`,
     with
 
@@ -37,7 +38,9 @@ def dgp_time_invariant_fixed_effects_model(T, N, *, beta1, beta2, **kw):
         \eta_{it,j}\stackrel{\text{i.i.d}}{\sim} N(0,1), \qquad j\in \{1,2\},\\
         \alpha_i\stackrel{\text{i.i.d}}{\sim} N(0,1),\\
         \epsilon_{it}\stackrel{\text{i.i.d}}{\sim} N(0,4).
+
     """
+
     # Set parameters
     p = 2
     mu = 0

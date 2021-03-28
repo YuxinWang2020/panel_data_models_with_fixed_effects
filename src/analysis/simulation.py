@@ -56,8 +56,8 @@ def simulation_coefficient(
     Returns
     -------
     df_sim_result : DataFrame
-        Columns are T, N, sim, *beta_interactive, *beta_within, *sde_interactive,
-        *sde_within
+        Columns are T, N, sim, beta_interactive, beta_within, sde_interactive,
+        sde_within
     """
 
     assert len(all_N) == len(all_T), "all_N and all_T must has same length"
