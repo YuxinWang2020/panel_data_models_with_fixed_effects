@@ -25,28 +25,29 @@ def simulation_coefficient(
     **beta_true
 ):
     """
-    Monte carlo simulation to estimate beta hat and sde of coefficient.
+    Monte carlo simulation to estimate beta hat and standard error of coefficient.
 
     Parameters
     ----------
     dgp_func : function
         One function in monte_carlo_dgp
     all_N : array-like
-        All sample sizes of entity
+        Different sample sizes of entity
     all_T : array-like
-        All sample sizes of time
+        Different sample sizes of time
     nsims : int
-        Simulation times for the same N and T
+        Simulation times under the same N and T
     need_sde : bool
-        Flag whether to caculate sde, which takes lots of times
+        Flag the sde caculation conditions
     tolerance : float, optional
         Iteration precision.
     r : int, optional
         Number of factors.
     interactive_start_value_effect : string, optional
-        The effects used in linearmodels for starting value, one of "pooling", "twoways"
+        The effects used in package linearmodels for starting value, one of "pooling",
+        "twoways"
     within_effect : string, optional
-        The effects used in linearmodels for within estimate, one of "twoways",
+        The effects used in package linearmodels for within estimator, one of "twoways",
         "individual"
     beta_true : float
         Coefficient of variables used in dgp_func. Values in ("beta1", "beta2", "mu",
@@ -169,21 +170,21 @@ def simulation_coefficient(
 def statistics_coefficient(all_N, all_T, nsims, df_sim_result, **beta_true):
     """
     Generate statistics of each N & T, take the mean of different simulations, and
-    store them in a data frame including mean, bias, rmse, standard error and cofidence
-    interval.
+    store them in a data frame. We include mean, bias, the RMSE, standard error and
+    cofidence interval in our statistical results.
 
     Parameters
     ----------
     all_N : array-like
-        All sample size of entity
+        Different sample sizes of entity
     all_T : array-like
-        All sample size of time
+        Different sample sizes of time
     nsims : int
-        Simulation times for the same N and T
+        Simulation times under the same N and T
     df_sim_result : DataFrame
-        Simulation result from function `simulation_coefficient`
+        Simulation results from function `simulation_coefficient`
     beta_true : float
-        Coefficient of variables used in dgp_func. Values in ("beta1", "beta2", "mu",
+        Coefficients of variables used in dgp_func. Values in ("beta1", "beta2", "mu",
         "gamma", "delta")
 
     """

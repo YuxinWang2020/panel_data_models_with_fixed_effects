@@ -1,8 +1,8 @@
 """
 Task for estimating the parameters in interactive fixed effects model by using different
-numbers of factors.
+numbers of factors.\\
 Task for estimating factor numbers in interactive fixed effects model by choosing
-different penalty functions with criteria PC and IC.
+different penalty functions g1,g2,g3 with criterias PC and IC.
 """
 import json
 

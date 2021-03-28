@@ -1,5 +1,5 @@
 """
-Task for caculate statistical results for coefficients by using `statistics_coefficient`
+Task for caculating statistical results for coefficients by using `statistics_coefficient`
 function. The inputs of the function come from `task_simulation_coefficient`.
 """
 import json

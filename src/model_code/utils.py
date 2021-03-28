@@ -20,7 +20,7 @@ def _find_max_list(lists):
 def stretch(lists):
     """
     Stretch lists to same length.
-    Shorter lists repeat to reach the same length as the longest.
+    Shorter lists is repeated to reach the same length as the longest.
     """
     lists = [lst if iterable(lst) else [lst] for lst in lists]
     max_len = _find_max_list(lists)
@@ -37,16 +37,16 @@ def reduce_concat(x, sep=""):
 def paste(*lists, sep=" ", collapse=None):
     """
     Concatenate vectors after converting to character.
-    The `Paste` function in R implementation in Python.
+    Implement the function `Paste` in R.
 
     Parameters
     ----------
     lists : array-like
-        One or more objects, to be converted to character vectors.
+        One or more objects, to be converted into character vectors.
     sep : string
-        A character string to separate the terms
+        A character string used to separate the terms
     collapse : string
-        An optional character string to separate the results
+        An optional character string used to separate the results
     """
     lists = stretch(lists)
     result = map(lambda x: reduce_concat(x, sep=sep), zip(*lists))
@@ -57,7 +57,7 @@ def paste(*lists, sep=" ", collapse=None):
 
 def paste0(*lists, collapse=None):
     """
-    paste0(..., collapse) is equivalent to paste(..., sep = "", collapse), slightly
-    more efficiently.
+    paste0(..., collapse) is similar to paste(..., sep = "", collapse), but the former
+    one is slightly more efficient.
     """
     return paste(*lists, sep="", collapse=collapse)

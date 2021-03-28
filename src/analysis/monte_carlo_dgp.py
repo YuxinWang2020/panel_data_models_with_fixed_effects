@@ -4,7 +4,7 @@ import pandas as pd
 
 def dgp_time_invariant_fixed_effects_model(T, N, *, beta1, beta2, **kw):
     r"""
-    Monte carlo data generate processor for "Interactive Fixed Effects Model with Common
+    Data generating process for "Interactive Fixed Effects Model with Common
     Regressors and Time-invariant Regressors"
 
     Parameters
@@ -21,10 +21,10 @@ def dgp_time_invariant_fixed_effects_model(T, N, *, beta1, beta2, **kw):
     Returns
     -------
     X : array-like
-        Simulate data of Exogenous or right-hand-side variables (variable by time by
+        Simulate data of exogenous or right-hand-side variables (variable by time by
         entity).
     Y : array-like
-        Simulate data of Dependent (left-hand-side) variable (time by entity).
+        Simulate data of dependent (left-hand-side) variable (time by entity).
 
     Notes
     -----
@@ -57,7 +57,7 @@ def dgp_time_invariant_fixed_effects_model(T, N, *, beta1, beta2, **kw):
 
 def dgp_additive_fixed_effects_model(T, N, *, beta1, beta2, **kw):
     r"""
-    Monte carlo data generate processor for "Interactive Fixed Effects Model with Common
+    Data generating process for "Interactive Fixed Effects Model with Common
     Regressors and Time-invariant Regressors"
 
     Parameters
@@ -74,10 +74,10 @@ def dgp_additive_fixed_effects_model(T, N, *, beta1, beta2, **kw):
     Returns
     -------
     X : array-like
-        Simulate data of Exogenous or right-hand-side variables (variable by time by
+        Simulate data of exogenous or right-hand-side variables (variable by time by
         entity).
     Y : array-like
-        Simulate data of Dependent (left-hand-side) variable (time by entity).
+        Simulate data of dependent (left-hand-side) variable (time by entity).
 
     Notes
     -----
@@ -87,19 +87,15 @@ def dgp_additive_fixed_effects_model(T, N, *, beta1, beta2, **kw):
 
     .. math::
         \alpha_{i}, \xi_{t}\stackrel{\text{i.i.d}}{\sim}N(0,1).
-    Both of them are correlated with the two regressors
+    Both of two fixed effects are correlated with the two regressors
 
     .. math::
-        \[
-            X_{it,j}=3+2\alpha_i+2\xi_t+\eta_{it,j},
-        \]
+        X_{it,j}=3+2\alpha_i+2\xi_t+\eta_{it,j},
     with
 
     .. math::
-        \[
-            \eta_{it,j}\stackrel{\text{i.i.d}}{\sim} N(0,1) \qquad j\in \{1,2\}.
-        \]
-    The regression error
+        \eta_{it,j}\stackrel{\text{i.i.d}}{\sim} N(0,1) \qquad j\in \{1,2\}.
+    The error term satisfies
 
     .. math::
         \epsilon_{it} \stackrel{\text{i.i.d}}{\sim}N(0,4).
@@ -125,7 +121,7 @@ def dgp_additive_fixed_effects_model(T, N, *, beta1, beta2, **kw):
 
 def dgp_interactive_fixed_effects_model(T, N, *, beta1, beta2, mu, **kw):
     r"""
-    Monte carlo data generate processor for "Interactive Fixed Effects Model"
+    Data generating process for "Interactive Fixed Effects Model"
 
     Parameters
     ----------
@@ -143,10 +139,10 @@ def dgp_interactive_fixed_effects_model(T, N, *, beta1, beta2, mu, **kw):
     Returns
     -------
     X : array-like
-        Simulate data of Exogenous or right-hand-side variables (variable by time by
+        Simulate data of exogenous or right-hand-side variables (variable by time by
         entity).
     Y : array-like
-        Simulate data of Dependent (left-hand-side) variable (time by entity).
+        Simulate data of dependent (left-hand-side) variable (time by entity).
 
     Notes
     -----
@@ -155,13 +151,9 @@ def dgp_interactive_fixed_effects_model(T, N, *, beta1, beta2, mu, **kw):
     where
 
     .. math::
-    \[
         \lambda_i = \binom{\lambda_{i1}}{\lambda_{i2}} \stackrel{\text{i.i.d}}{\sim}
         N(0,I_2),
-    \]
-    \[
         F_t =\binom{F_{t1}}{F_{t2}}\stackrel{\text{i.i.d}}{\sim}  N(0,I_2),
-    \]
     The regressors are generated according to:
 
     .. math::
@@ -173,7 +165,7 @@ def dgp_interactive_fixed_effects_model(T, N, *, beta1, beta2, mu, **kw):
         \eta_{it,j}\stackrel{\text{i.i.d}}{\sim} N(0,1) \qquad j\in \{1,2\}.
     The regressors are correlated with :math:`\lambda_i`, :math:`f_t`, and the product
     :math:`\lambda_i' F_t`.
-    The regression error
+    The error term satisfies
 
     .. math::
         \epsilon_{it} \stackrel{\text{i.i.d}}{\sim}N(0,4).
@@ -196,7 +188,7 @@ def dgp_interactive_fixed_effects_model_with_common_and_time_invariant(
     T, N, *, beta1, beta2, mu, gamma, delta, **kw
 ):
     r"""
-    Monte carlo data generate processor for "Interactive Fixed Effects Model with Common
+    Data generating process for "Interactive Fixed Effects Model with Common
     Regressors and Time-invariant Regressors"
 
     Parameters
@@ -219,10 +211,10 @@ def dgp_interactive_fixed_effects_model_with_common_and_time_invariant(
     Returns
     -------
     X : array-like
-        Simulate data of Exogenous or right-hand-side variables (variable by time by
+        Simulate data of exogenous or right-hand-side variables (variable by time by
         entity).
     Y : array-like
-        Simulate data of Dependent (left-hand-side) variable (time by entity).
+        Simulate data of dependent (left-hand-side) variable (time by entity).
 
     Notes
     -----
@@ -232,13 +224,9 @@ def dgp_interactive_fixed_effects_model_with_common_and_time_invariant(
     where
 
     .. math::
-    \[
         \lambda_i = \binom{\lambda_{i1}}{\lambda_{i2}} \stackrel{\text{i.i.d}}{\sim}
         N(0,I_2),
-    \]
-    \[
         F_t =\binom{F_{t1}}{F_{t2}}\stackrel{\text{i.i.d}}{\sim}N(0,I_2).
-    \]
     The regressors are generated according to:
 
     .. math::
@@ -338,8 +326,8 @@ def _ndarray_to_panel_df(X, Y):
 
 def dgp_random_iid_residual(N, T, r):
     """
-    Rand residual data generate processor.
-    Residual = Y - beta * X = Lambda * Factor + eps
+    Data generating process for random distributed residual.\\
+    Residual = Y - beta * X = Lambda * Factor + eps\\
     Shape of residual is (N, T).
     """
     lambda_ = np.random.normal(loc=0, scale=1, size=(r, N))
