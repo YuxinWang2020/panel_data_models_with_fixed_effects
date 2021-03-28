@@ -15,29 +15,20 @@ The data set is a panel of 46 observations from 1963 to 1992.
 
 Containing :
 
-* state
-state abbreviation
+* state: state abbreviation
 
-* year
-the year
+* year: the year
 
-* price
-price per pack of cigarettes
+* price: price per pack of cigarettes
 
-* pop
-population
+* pop: population
 
-* pop16
-population above the age of 16
+* pop16: population above the age of 16
 
-* cpi
-consumer price index (1983=100)
+* cpi: consumer price index (1983=100)
 
-* ndi
-per capita disposable income
+* ndi: per capita disposable income
 
-* sales
-cigarette sales in packs per capita
+* sales: cigarette sales in packs per capita
 
-* pimin
-minimum price in adjoining states per pack of cigarettes
+* pimin: minimum price in adjoining states per pack of cigarettes

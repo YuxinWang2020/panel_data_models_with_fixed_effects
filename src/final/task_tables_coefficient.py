@@ -1,3 +1,7 @@
+"""
+Use tables to show the convergence properties of the estimators mentioned in the
+paper, and compare how well they work in different panel data models.
+"""
 import json
 
 import pytask

@@ -1,3 +1,7 @@
+"""
+Use figures and tables to show the properties of factor estimation models in finite
+panel data sets.
+"""
 import json
 
 import numpy as np

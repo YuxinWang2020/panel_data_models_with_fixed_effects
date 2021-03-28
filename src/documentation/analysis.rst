@@ -1,9 +1,7 @@
-.. _analysis:
-
-.. _monte_carlo_simulations_and_real_data_application
+.. _monte_carlo_simulations_and_real_data_application:
 
 *************************************************
-Monte Carlo simulations and real data application
+Monte Carlo Simulations and Real Data Application
 *************************************************
 
 Documentation of the code in *src.analysis*. This is the core of the project.
@@ -11,20 +9,24 @@ Documentation of the code in *src.analysis*. This is the core of the project.
 The analysis in this project contains three aspects:
 
 1. Estimation of slope coefficients
-    1. IID data simulations
-    2. ARI data simulations
-    3. Starting Values in additive fixed effects model
+    1. Monte carlo simulations under IID assumption
+    2. Monte carlo simulations under ARI time fixed effects
+    3. Starting Values in the additive fixed effects model
 2. Estimation of the number of factors
-    1. Estimate interactive fixed effects model for different number of factors
-    2. Estimate factor number by choosing different penalty functions with the criteria PC and IC
+    1. Estimate the parameters in interactive fixed effects model by using different numbers of factors
+    2. Estimate factor numbers in interactive fixed effects model by choosing different penalty functions with criteria PC and IC
 3. Real data application
+    1. Use a panel data set of 46 observations from 1963 to 1992.
+    2. Estimate the coefficients and factor numbers by using the model in Baltagi and Levin (1992)
 
 
 Process of Monte Carlo simulations:
 
-1. Monte carlo data generating processes
-2. Interactive-effects estimator and within estimator
-3. Statistics of mean, bias, rmse, standard error and cofidence interval
+1. Data generating processes for monte carlo simulations
+2. Estimate model parameters by interactive-effects estimator and within estimator
+3. Caculate statistical results for coefficients, including mean, bias, root-mean-square error, standard error and cofidence interval
+
+Function `simulation_coefficient` in module `src.analysis.simulation` is defined for running the simulations with different number of individuals and time periods over 1000 repetitions.
 
 
 Data Generating Processor for Monte Carlo Simulation

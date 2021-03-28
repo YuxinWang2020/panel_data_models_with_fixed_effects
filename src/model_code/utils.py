@@ -1,3 +1,6 @@
+"""
+Some pure functions used frequently.
+"""
 import functools
 from collections.abc import Iterable
 

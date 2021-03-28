@@ -4,7 +4,8 @@
 Model code
 **********
 
-This directory *src.model_code* contains interactive fixed effects model estimator and factor number estimator, and some statistics and util funcitons.
+This directory *src.model_code* contains interactive fixed effects model estimator and
+factor number estimator, and some statistical and utility funcitons.
 
 
 The ``InteractiveFixedEffect`` class

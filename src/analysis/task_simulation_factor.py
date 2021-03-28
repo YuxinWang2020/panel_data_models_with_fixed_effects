@@ -1,3 +1,9 @@
+"""
+Task for estimating the parameters in interactive fixed effects model by using different
+numbers of factors.
+Task for estimating factor numbers in interactive fixed effects model by choosing
+different penalty functions with criteria PC and IC.
+"""
 import json
 
 import numpy as np
@@ -26,6 +32,10 @@ from src.model_code.interactive_fixed_effect import InteractiveFixedEffect
     }
 )
 def task_simulation_and_statistics_range_r(depends_on, produces):
+    """
+    Task for estimating the parameters in interactive fixed effects model by using
+    different numbers of factors.
+    """
     # set parameters
     simulate = json.loads(depends_on.read_text(encoding="utf-8"))
     dgp_func = globals()[simulate["dgp_func"]]
@@ -74,6 +84,12 @@ def task_simulation_and_statistics_range_r(depends_on, produces):
 
 @pytask.mark.produces(BLD / "tables" / "determine_num_of_factors_random_iid.csv")
 def task_factor_estimate_random_iid_residual(produces):
+    """
+    Task for estimating factor numbers in the model defined by the function
+    `dgp_random_iid_residual`.
+    We choose different penalty functions g1,g2,g3 with criterias PC and IC.
+    It replicates the result of Table 2 in Bai,Ng (2002), page 205.
+    """
     r = 3
     rmax = 8
     nsims = 1000
@@ -108,6 +124,10 @@ def task_factor_estimate_random_iid_residual(produces):
 
 @pytask.mark.produces(BLD / "tables" / "determine_num_of_factors_model4.csv")
 def task_factor_estimate_interactive_fixed_effects_model(produces):
+    """
+    Task for estimating factor numbers in interactive fixed effects model.
+    We choose different penalty functions g1,g2,g3 with criterias PC and IC.
+    """
     rmax = 8
     nsims = 1000
     all_N = [100, 100, 100, 100, 10, 20, 50]

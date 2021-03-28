@@ -1,3 +1,6 @@
+"""
+Some pure functions to caculate statistical results
+"""
 import numpy as np
 
 

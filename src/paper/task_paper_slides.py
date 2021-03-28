@@ -1,3 +1,6 @@
+"""
+Compile latex documents into pdfs for report and presentation.
+"""
 import shutil
 
 import pytask

@@ -32,9 +32,9 @@ def simulation_coefficient(
     dgp_func : function
         One function in monte_carlo_dgp
     all_N : array-like
-        All sample size of entity
+        All sample sizes of entity
     all_T : array-like
-        All sample size of time
+        All sample sizes of time
     nsims : int
         Simulation times for the same N and T
     need_sde : bool

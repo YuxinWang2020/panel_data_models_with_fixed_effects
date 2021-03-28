@@ -1,3 +1,7 @@
+"""
+Task for applying different models, number of individuals and time periods to function
+`simulation_coefficient`.
+"""
 import json
 
 import numpy as np
