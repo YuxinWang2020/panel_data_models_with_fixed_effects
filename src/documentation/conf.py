@@ -27,10 +27,8 @@ needs_sphinx = "1.1"
 extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.viewcode",
-    "sphinxcontrib.bibtex",
     "sphinx.ext.mathjax",
 ]
-bibtex_bibfiles = ["refs.bib"]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -46,7 +44,7 @@ master_doc = "index"
 
 # General information about the project.
 project = "Panel Data Models with Fixed Effects"
-copyright = "2019-, Yuxin Wang"
+copyright = "2021-March, Yuxin Wang"
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the

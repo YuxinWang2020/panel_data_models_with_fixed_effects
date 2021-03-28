@@ -1,9 +1,12 @@
+"""
+Some pure functions to caculate statistical results
+"""
 import numpy as np
 
 
 def caculate_rmse(estimated, real):
     """
-    Caculate Root Mean Square Error
+    Caculate the root-mean-square-error
 
     Parameters
     ----------
@@ -25,7 +28,7 @@ def caculate_rmse(estimated, real):
 
 def caculate_sde(estimated):
     """
-    Caculate Standard Error
+    Caculate standard error
 
     Parameters
     ----------

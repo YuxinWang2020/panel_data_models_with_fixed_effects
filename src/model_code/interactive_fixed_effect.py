@@ -1,3 +1,7 @@
+"""
+Calculate the interactive fixed effect estimator as described in Bai(2009). The
+corresponding theory is in Chapter 3 of our report.
+"""
 import numpy as np
 
 
@@ -27,7 +31,7 @@ class InteractiveFixedEffect:
 
     def fit(self, r, beta_hat_0=None, tolerance=0.0001):
         """
-        Estimate model parameters
+        Estimate parameters of different model
 
         Parameters
         ----------
@@ -41,13 +45,13 @@ class InteractiveFixedEffect:
         Returns
         -------
         beta_hat : array-like
-            Estimate result of slope coefficients. Same order as exog variable.
+            Estimate the result of slope coefficients. Same order as exog variable.
         beta_hat_list : array-like
             Iteration intermediate values.
         f_hat : array-like
-            Estimate result of Factor.
+            Estimate the result of time fixed effects.
         lambda_hat : array-like
-            Estimate result or Lambda.
+            Estimate the result of individual fixed effects.
         """
         if beta_hat_0 is None:
             beta_hat_0 = np.zeros(shape=(1, self.p))
@@ -70,7 +74,7 @@ class InteractiveFixedEffect:
         for i in range(self.N):
             w_i = self._dependent[:, i] - beta_hat.dot(self._exog[:, :, i])
             wwt = wwt + w_i.T.dot(w_i)
-        w, v = np.linalg.eig(wwt)
+        w, v = np.linalg.eigh(wwt)
         f_hat = np.sqrt(self.T) * v[:, np.argsort(-w)[0:r]]
         return f_hat
 
@@ -95,7 +99,7 @@ class InteractiveFixedEffect:
 
     def calculate_sde(self, beta_hat, f_hat, lambda_hat):
         """
-        Calculate Standard Error of beta_hat estimated from fit
+        Calculate standard error of beta_hat estimated from fit
         """
         beta_hat = np.array(beta_hat).reshape(1, self.p)
         a = self._calculate_a(lambda_hat)

@@ -4,13 +4,28 @@
 Model code
 **********
 
-The directory *src.model_code* contains source files that might differ by model and which are potentially used at various steps of the analysis.
+This directory *src.model_code* contains interactive fixed effects model estimator and
+factor number estimator, and some statistical and utility funcitons.
 
-For example, you may have a class that is used both in the :ref:`analysis` and the :ref:`final` steps. Additionally, maybe you have different utility functions in the baseline version and for your robustness check. You can just inherit from the baseline class and override the utility function then.
 
-The ``Agent`` class of the Schelling example
+The ``InteractiveFixedEffect`` class
 ============================================
 
-.. automodule:: src.model_code.agent
+
+.. automodule:: src.model_code.interactive_fixed_effect
+    :members:
+
+
+The ``Statistics`` module
+============================================
+
+.. automodule:: src.model_code.statistics
+    :members:
+
+
+The ``utils`` module
+============================================
+
+.. automodule:: src.model_code.utils
     :members:
 
