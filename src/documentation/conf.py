@@ -27,10 +27,8 @@ needs_sphinx = "1.1"
 extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.viewcode",
-    "sphinxcontrib.bibtex",
     "sphinx.ext.mathjax",
 ]
-bibtex_bibfiles = ["refs.bib"]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
