@@ -1,0 +1,36 @@
+{
+  "dgp_func": "dgp_interactive_fixed_effects_model_with_common_and_time_invariant_no_iid",
+  "all_N": [
+    100,
+    100,
+    100,
+    100,
+    10,
+    20,
+    50
+  ],
+  "all_T": [
+    10,
+    20,
+    50,
+    100,
+    100,
+    100,
+    100
+  ],
+  "nsims": 1000,
+  "need_sde": false,
+  "tolerance": 0.0001,
+  "r": 2,
+  "interactive_start_value_effect": "pooling",
+  "within_effect": "twoways",
+  "beta_true": {
+    "beta1": 1,
+    "beta2": 3,
+    "mu": 5,
+    "gamma": 2,
+    "delta": 4
+  },
+  "rng_seed": 34,
+  "model_name": "model4"
+}
