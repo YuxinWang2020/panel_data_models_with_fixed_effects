@@ -391,7 +391,7 @@ def dgp_additive_fixed_effects_model_no_iid(T, N, *, beta1, beta2, **kw):
     )
     lambda_ = np.hstack(
         (
-            arma_generate_sample(ar=[1, 0.7], ma=[1], nsample=(N, 1)),
+            np.random.normal(loc=0, scale=1, size=(N, 1)),
             np.ones(shape=(N, 1)),
         )
     )
@@ -465,7 +465,7 @@ def dgp_interactive_fixed_effects_model_no_iid(T, N, *, beta1, beta2, mu, **kw):
     gamma = 0
     delta = 0
     factor = arma_generate_sample(ar=[1, 0.7], ma=[1], nsample=(T, 2))
-    lambda_ = arma_generate_sample(ar=[1, 0.7], ma=[1], nsample=(N, 2))
+    lambda_ = np.random.normal(loc=0, scale=1, size=(N, 2))
     X, Y = _dgp_fixed_effect_panel_data(
         T, N, beta1, beta2, mu, gamma, delta, factor, lambda_
     )
@@ -546,7 +546,7 @@ def dgp_interactive_fixed_effects_model_with_common_and_time_invariant_no_iid(
     """
     # Set parameters
     factor = arma_generate_sample(ar=[1, 0.7], ma=[1], nsample=(T, 2))
-    lambda_ = arma_generate_sample(ar=[1, 0.7], ma=[1], nsample=(N, 2))
+    lambda_ = np.random.normal(loc=0, scale=1, size=(N, 2))
     X, Y = _dgp_fixed_effect_panel_data(
         T, N, beta1, beta2, mu, gamma, delta, factor, lambda_
     )
